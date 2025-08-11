@@ -1,0 +1,48 @@
+ :root {
+      --primary-color: #2c3e50;
+      --accent-color: #e74c3c;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+
+    .welcome-banner {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 1rem 0;
+    }
+
+    footer {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+    
+    .contact-toggle {
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+    max-height: 0;
+    }
+
+    .contact-toggle.open {
+    max-height: 500px; /* Ajuste selon le contenu */
+    }

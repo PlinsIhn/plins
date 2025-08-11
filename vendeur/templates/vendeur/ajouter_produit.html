@@ -1,0 +1,591 @@
+{% extends 'vendeur/base_vendeur.html' %}
+{% load static %}
+
+  <!-- Bloc pour CSS additionnel -->
+{% block extra_css %} 
+  <link rel="stylesheet" href="{% static 'css/ajouter_produit.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+  <div class="container">
+    <form id="ajouter-produit-form" method="post" enctype="multipart/form-data">
+
+      {% csrf_token %}
+
+      <h2 class="ajouter_produit_titre mt-3"> Hampiditra entana</h2>
+
+      <!-- 1 -->
+      <div class="box container mt-4">
+        <h4>Information de base</h4>
+        <div class="row justify-content-center">            
+          <div class="row mb-3">
+            <div class="col-md-6 position-relative mt-4">
+              <label for="id_nom_produit" class="form-label custom-label">
+                <small>&nbsp; Nom du produit <span class="required-star">*</span> &nbsp;</small>
+              </label>
+              <input
+                type="text"
+                class="form-control {% if produit_form.errors.nom_produit %}is-invalid{% endif %} custom-input"
+                id="id_nom_produit"
+                name="nom_produit"
+                required
+                value="{{ produit_form.data.nom_produit }}"
+                placeholder="ohatra : Kiraro"
+              >
+              {% if produit_form.errors.nom_produit %}
+              <div class="invalid-feedback">
+                {{ produit_form.errors.nom_produit.0 }}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6 position-relative mt-4">
+              <label for="id_description" class="form-label custom-label">
+                <small>&nbsp; Description <span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <textarea
+                class="form-control {% if produit_form.errors.description %}is-invalid{% endif %} custom-input"
+                id="id_description"
+                name="description"
+                rows="1"
+                required
+                placeholder="ohatra : Kiraro ... manao sport"
+              >{{ produit_form.data.description }}</textarea>
+              {% if produit_form.errors.description %}
+              <div class="invalid-feedback">
+                {{ produit_form.errors.description.0 }}
+              </div>
+              {% endif %}
+            </div>
+            <!-- script 0 -->
+            <div class="col-md-6 position-relative mt-4">
+              <label for="id_moq" class="form-label custom-label">
+                <small>&nbsp; Minimum de commande <span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <input
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                class="form-control {% if produit_form.errors.moq %}is-invalid{% endif %} custom-input"
+                id="id_moq"
+                name="moq"
+                required
+                onkeydown="return onlyDigits(event)"
+                value="{{ produit_form.data.moq }}"
+                placeholder="ohatra : 5"
+              >
+              {% if produit_form.errors.moq %}
+              <div class="invalid-feedback">
+                {{ produit_form.errors.moq.0 }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 position-relative mt-4">
+              <label for="id_mot_clet" class="form-label custom-label">
+                <small>&nbsp;Mot clé <span>(rehefa tedavina)</span><span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <input 
+                type="text"
+                class="form-control custom-input"
+                name="mot_clet"
+                id="id_mot_clet"
+                placeholder="kiraro, jordan, cuir, etc"
+                >
+            </div>
+
+            <div class="col-md-6 position-relative mt-4">
+              <label for="id_modele_livraison" class="form-label custom-label">
+                <small>&nbsp;Modèle de livraison <span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <select 
+                name="modele_livraison"
+                id="id_modele_livraison"
+                class="form-select {% if produit_form.errors.modele_livraison %}is-invalid{% endif %} custom-input"
+                required>
+                <option value="">---------</option>
+                {% for obj in produit_form.fields.modele_livraison.queryset %}
+                  <option value="{{ obj.id }}" {% if produit_form.data.modele_livraison == obj.id|stringformat:"s" %}selected{% endif %}>
+                    {{ obj.nom }}, calculer par : {{ obj.get_calcul_par_display }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if produit_form.errors.modele_livraison %}
+              <div class="invalid-feedback">
+                {{ produit_form.errors.modele_livraison.0 }}
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- script 1 -->
+            <div class="col-md-6 position-relative mt-4">
+              <label for="id_image_profil_produit" class="form-label custom-label">
+                <small>&nbsp; Sarin'ilay Produit <span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <input
+                type="file"
+                class="form-control custom-input"
+                id="id_image_profil_produit"
+                name="image_profil_produit"
+                accept="image/*"
+                onchange="previewImage(event)"
+                required
+              >
+              <!-- Style 2 -->
+              <div id="preview-container">
+                <img
+                  id="preview-image"
+                  src="#"
+                  alt="Aperçu image"
+                >
+              </div>
+            </div>
+
+<div class="col-md-12 position-relative mt-4">
+  <label for="{{ produit_form.promo_active.id_for_label }}" class="form-label custom-label">
+    {{ produit_form.promo_active }}&nbsp; Activer la promotion produit
+  </label>
+</div>
+
+<div id="promo_fields" class="row" style="display: none;">
+  <div class="col-md-4 position-relative mt-3">
+    <label for="{{ produit_form.reduction_pourcentage.id_for_label }}" class="form-label custom-label">
+      Réduction (%)
+    </label>
+    {{ produit_form.reduction_pourcentage }}
+  </div>
+
+  <div class="col-md-4 position-relative mt-3">
+    <label for="{{ produit_form.promo_debut.id_for_label }}" class="form-label custom-label">
+      Date début promo
+    </label>
+    {{ produit_form.promo_debut }}
+  </div>
+
+  <div class="col-md-4 position-relative mt-3">
+    <label for="{{ produit_form.promo_fin.id_for_label }}" class="form-label custom-label">
+      Date fin promo
+    </label>
+    {{ produit_form.promo_fin }}
+  </div>
+</div>
+
+<script>
+  function togglePromoFields() {
+    const checkbox = document.getElementById('{{ produit_form.promo_active.id_for_label }}');
+    const promoFields = document.getElementById('promo_fields');
+    promoFields.style.display = checkbox.checked ? 'flex' : 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const checkbox = document.getElementById('{{ produit_form.promo_active.id_for_label }}');
+    checkbox.addEventListener('change', togglePromoFields);
+    togglePromoFields();  // affiche ou cache selon l'état initial au chargement
+  });
+</script>
+
+          </div>
+        </div>
+      </div>
+      <!-- script 2 -->
+      <div class="box container mt-4">
+        <h4>Karazan'ilay entana</h4>
+        <div id="variation-error-message" class="block-error" style="display: none;"></div>
+        {{ variation_formset.management_form }}
+
+        {% if variation_formset.non_form_errors %}
+          <div class="text-danger mb-2">
+            {{ variation_formset.non_form_errors }}
+          </div>
+        {% endif %}
+
+        <div id="variation-forms-container">
+          {% for form in variation_formset %}
+          <div class="variation-form border p-2 mb-4 rounded position-relative" >
+
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-variation " style="background-color: red; padding:5px;" aria-label="Supprimer"></button>
+            
+            <div class="row mb-2 mt-2">
+
+              <!-- nom_variation -->
+              <div class="col-md-6 position-relative mt-4">
+                <label for="{{ form.nom_variation.id_for_label }}" class="form-label custom-label">
+                  <small>&nbsp; Nom de la variation <span class="required-star">*</span>&nbsp;</small>
+                </label>
+                <input
+                  type="text"
+                  class="form-control {% if form.nom_variation.errors %}is-invalid{% endif %} custom-input"
+                  id="{{ form.nom_variation.id_for_label }}"
+                  name="{{ form.nom_variation.html_name }}"
+                  {% if form.nom_variation.value %}value="{{ form.nom_variation.value }}"{% endif %}
+                  required
+                  placeholder="ohatra : Kiraro pt 41"
+                >
+                {% if form.nom_variation.errors %}
+                  <div class="invalid-feedback">{{ form.nom_variation.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <!-- script 2 prix  -->
+              <div class="col-md-6 position-relative mt-4">
+                <label for="{{ form.prix.id_for_label }}" class="form-label custom-label">
+                  <small>&nbsp; Vidiny @ Ariary <span class="required-star">*</span>&nbsp;</small>
+                </label>
+                <input
+                  type="text"
+                  class="form-control {% if form.prix.errors %}is-invalid{% endif %} custom-input"
+                  id="{{ form.prix.id_for_label }}"
+                  name="{{ form.prix.html_name }}"
+                  {% if form.prix.value %}value="{{ form.prix.value }}"{% endif %}
+                  min="0"
+                  step="10"
+                  required
+                  placeholder="20 000"
+                  inputmode="numeric"
+                  oninput="formatNumberInput(this)"
+                >
+                
+                {% if form.prix.errors %}
+                  <div class="invalid-feedback">{{ form.prix.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <!-- stock -->
+              <div class="col-md-6 position-relative mt-4">
+                <label for="{{ form.stock.id_for_label }}" class="form-label custom-label">
+                  <small>&nbsp; Stock <span class="required-star">*</span>&nbsp;</small>
+                </label>
+                <input
+                  type="number"
+                  class="form-control {% if form.stock.errors %}is-invalid{% endif %} custom-input"
+                  id="{{ form.stock.id_for_label }}"
+                  name="{{ form.stock.html_name }}"
+                  {% if form.stock.value %}value="{{ form.stock.value }}"{% endif %}
+                  min="1"
+                  step="1"
+                  onkeydown="return onlyDigits(event)"
+                  required
+                  placeholder="ohatra : 10"
+                >
+                {% if form.stock.errors %}
+                  <div class="invalid-feedback">{{ form.stock.errors.0 }}</div>
+                {% endif %}
+              </div>
+
+              <!-- STYLE script 3 -->
+              <div class="col-md-6 position-relative mt-4">
+                <label for="{{ form.image_variation.id_for_label }}" class="form-label custom-label">
+                  <small>&nbsp; Image de la variation &nbsp;</small>
+                </label>
+                <input
+                  type="file"
+                  class="form-control custom-input image-variation-input"
+                  id="{{ form.image_variation.id_for_label }}"
+                  name="{{ form.image_variation.html_name }}"
+                  accept="image/*"
+                />
+                <!-- STYLE  4 -->
+                <div class="preview-container mt-2" id="image_de_variation">
+                  <img class="preview-image" src="#" >
+                </div>
+
+                
+                {% if form.nom_variation.errors %}
+                  <div class="block-error">{{ form.nom_variation.errors.0 }}</div>
+                {% endif %}
+
+              </div>
+
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- STYLE  5 -->
+        <div class="text-end">
+          <button type="button" id="add-variation" >
+            + Ajouter une variation
+          </button>
+        </div>
+        <br>
+      </div>
+
+
+      <!-- === Détails === -->
+      <div class="box container mt-4">
+        <h4 class="d-inline-block">
+          Sary sy Video detaille
+        </h4>
+        <button type="button"
+                class="btn btn-sm text-info ms-2"
+                data-bs-toggle="tooltip"
+                data-bs-placement="right"
+                title="Video ampidirina: 100Mo et 10mn  Max, fa ny enregistré dia 30s ihany, sary detaille 10 isa max">
+          <i class="bi bi-info-circle"></i>
+        </button>
+
+        <div class="row mb-3">
+
+          <!-- Vidéo -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_detaille_file" class="form-label custom-label">
+              <small>&nbsp; Vidéo &nbsp;</small>
+            </label>
+            <input
+              type="file"
+              class="form-control custom-input"
+              id="id_detaille_file"
+              name="detaille_file"
+              accept="video/*"
+            >
+          </div>
+
+          <!-- script 7 -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_detaille_image" class="form-label custom-label">
+              <small>&nbsp; Sary <span class="required-star">*</span>&nbsp;</small>
+            </label>
+            <input
+              type="file"
+              class="form-control custom-input"
+              id="id_detaille_image"
+              name="detaille_image"
+              accept="image/*"
+              multiple
+              required
+            >
+            <!-- Conteneur d'aperçu -->
+            <div id="detail-preview-container" class="d-flex flex-wrap gap-2 mt-3 mb-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- style 6 -->
+      <div class="text-enregistrer box1 container mt-4">
+        <button type="submit">
+          Ajouter le produit
+        </button>
+      </div>
+
+    </form>
+  </div>
+  
+
+<!-- script 2 -->
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const addBtn = document.getElementById('add-variation');
+      const formContainer = document.getElementById('variation-forms-container');
+      const totalFormsInput = document.getElementById('id_{{ variation_formset.prefix }}-TOTAL_FORMS');
+
+      addBtn.addEventListener('click', () => {
+        const forms = formContainer.querySelectorAll('.variation-form');
+        const lastForm = forms[forms.length - 1];
+        const newForm = lastForm.cloneNode(true);
+        const newIndex = forms.length;
+
+        // Remplacer tous les index dans les attributs
+        newForm.querySelectorAll('input, label').forEach(el => {
+          if (el.name) el.name = el.name.replace(/-\d+-/, `-${newIndex}-`);
+          if (el.id) el.id = el.id.replace(/-\d+-/, `-${newIndex}-`);
+          if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/-\d+-/, `-${newIndex}-`);
+        });
+
+        // Réinitialiser les champs
+        newForm.querySelectorAll('input').forEach(input => {
+          if (input.type !== 'file') input.value = '';
+          else input.value = null;
+        });
+
+        formContainer.appendChild(newForm);
+        totalFormsInput.value = newIndex + 1;
+      });
+
+      // Supprimer une variation
+      document.addEventListener('click', function (e) {
+        const errorMessage = document.getElementById('variation-error-message');
+
+        if (e.target.classList.contains('remove-variation')) {
+          const forms = formContainer.querySelectorAll('.variation-form');
+          if (forms.length > 1) {
+            e.target.closest('.variation-form').remove();
+            totalFormsInput.value = forms.length - 1;
+          } else {
+              // Afficher le message d'erreur
+              errorMessage.innerText = "Mila karazany 1 farafahakeliny.";
+              errorMessage.style.display = "block";
+              // ✅ Faire disparaître le message après 10 secondes
+              setTimeout(() => {
+                errorMessage.style.display = "none";
+                errorMessage.innerText = "";
+              }, 8000); // 10000ms = 10s
+              return;
+          }
+        }
+      });
+    });
+  </script>
+<style>
+  .required-star {
+  color: red;
+  font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      })
+    });
+  </script>
+
+  <script src="{% static 'js/ajouter_produit.js' %}" defer></script>
+
+
+<!-- ajax d'ajout du produit -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let cookie of cookies) {
+              cookie = cookie.trim();
+              if (cookie.startsWith(name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  $.ajaxSetup({
+      headers: { 'X-CSRFToken': csrftoken }
+  });
+
+
+
+
+
+  $('#ajouter-produit-form').on('submit', function(e) {
+    e.preventDefault();
+
+    const prixInputs = document.querySelectorAll('input[name$="-prix"], input[name="prix"]');
+    prixInputs.forEach(input => input.value = input.value.replace(/\s/g, '').trim());
+
+    let form = $(this)[0];
+    let formData = new FormData(form);
+    let messageDiv = $('#ajax-message');
+    let spinner = $('#loading-spinner');
+
+    $.ajax({
+      url: "{% url 'ajouter_produit' %}",
+      type: 'POST',
+      data: formData,
+      contentType: false,
+      processData: false,
+
+      beforeSend: function() {
+        // Affiche le modal (overlay)
+        var uploadModal = new bootstrap.Modal(document.getElementById('uploadOverlay'));
+        uploadModal.show();
+
+        // Affiche aussi le spinner s'il est utilisé
+        spinner.show();
+
+        // Réinitialise les messages d'erreurs et les validations
+        messageDiv.html('');
+        $('#ajouter-produit-form .is-invalid').removeClass('is-invalid');
+        $('#ajouter-produit-form .invalid-feedback').remove();
+      },
+
+      complete: function() {
+        // Cache le modal
+        var uploadModalEl = document.getElementById('uploadOverlay');
+        var modalInstance = bootstrap.Modal.getInstance(uploadModalEl);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+
+        // Cache le spinner (assurance en cas d’erreur)
+        spinner.hide();
+      },
+
+      success: function(response) {
+        $('#ajouter-produit-form')[0].reset();
+
+        messageDiv.html('<div class="alert alert-success">Produit ajouté avec succès !</div>');
+
+        // Fais disparaître après 3 secondes
+        setTimeout(() => {
+          const msgDiv = document.getElementById('ajax-message');
+          if (msgDiv) {
+            msgDiv.style.transition = 'opacity 0.5s ease';
+            msgDiv.style.opacity = '0';
+            setTimeout(() => {
+              msgDiv.innerHTML = '';
+              msgDiv.style.opacity = '1';
+            }, 500);
+          }
+        }, 3000);
+      },
+
+      error: function(xhr) {
+        // Cache toujours le spinner même en cas d'erreur
+        spinner.hide();
+
+        $('#ajouter-produit-form .is-invalid').removeClass('is-invalid');
+        $('#ajouter-produit-form .invalid-feedback').remove();
+
+        if (xhr.status === 400 && xhr.responseJSON?.errors) {
+          let errors = xhr.responseJSON.errors;
+          let generalErrors = [];
+
+          if (errors.form_errors) {
+            for (let field in errors.form_errors) {
+              let fieldErrors = errors.form_errors[field];
+              let input = $(`[name="${field}"]`);
+
+              if (input.length) {
+                input.addClass('is-invalid');
+                input.after(`<div class="invalid-feedback">${fieldErrors}</div>`);
+              } else {
+                generalErrors.push(`${field}: ${fieldErrors}`);
+              }
+            }
+          }
+
+          if (errors.formset_errors) {
+            errors.formset_errors.forEach((err, i) => {
+              generalErrors.push(`Variation ${i + 1} : ${err}`);
+            });
+          }
+
+          if (generalErrors.length > 0) {
+            messageDiv.html(
+              `<div class="alert alert-danger"><ul>${generalErrors.map(e => `<li>${e}</li>`).join('')}</ul></div>`
+            );
+          }
+        } else {
+          messageDiv.html('<div class="alert alert-danger">Une erreur est survenue lors de l\'envoi.</div>');
+        }
+      }
+    });
+  });
+</script>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,896 @@
+{% extends 'vendeur/base_vendeur.html' %}
+{% load static %}
+{% block extra_css %}
+
+<!-- Font Awesome 5 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+{% endblock %}
+
+{% block content %}
+  <h2 class="m-3 text-center text-danger">Gestion de frais de livraison</h2>
+
+
+  <div class="container">
+    {% for modele in modeles %}
+      <div class="mb-4 p-2" style="box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); border-radius: 8px;">
+        <div class="pb-2" >
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <!-- script 1, ouverture de oeil -->
+            <h4 class="mb-0">
+              <a class="text-decoration-none d-flex align-items-center" 
+                data-bs-toggle="collapse"
+                href="#collapseDetails{{ modele.id }}"
+                role="button"
+                aria-expanded="false"
+                aria-controls="collapseDetails{{ modele.id }}"
+                style="color: rgb(249, 129, 0);">
+                <span class="me-2">
+                  {{ modele.nom }}
+                </span>
+                <i id="icon_zone{{ modele.id }}" class="fas fa-eye-slash ms-2" style="font-size: 0.7em;"></i>
+              </a>
+            </h4>    &nbsp;&nbsp;        
+  
+            <div class="d-flex gap-2 align-items-center">
+              <a href="{% url 'edit_modele_livraison' modele.id %}" 
+                class="btn btn-sm btn-outline-primary open-modele-livraison-modal" 
+                data-url="{% url 'edit_modele_livraison' modele.id %}">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              <button type="button" 
+                      class="btn btn-sm btn-danger btn-supprimer-modele" 
+                      data-id="{{ modele.id }}" 
+                      data-nom="{{ modele.nom }}" 
+                      data-bs-toggle="modal" 
+                      data-bs-target="#deleteConfirmModal">
+                <i class="bi bi-trash"></i> 
+              </button>
+            </div>
+
+          </div>
+
+          <div class="collapse mt-1" id="collapseDetails{{ modele.id }}">
+            <div class="mb-1" style="font-size: 0.8em;">
+              <div class="mb-1">
+                <button class="btn btn-sm btn-outline-secondary" style="font-size: 0.85em;" type="button">
+                  <i class="fas fa-calculator me-1"></i>Calculer par : <span style="color: rgb(0, 0, 167);">{{ modele.get_calcul_par_display }}</span>
+                </button>
+                <buton class="btn btn-sm btn-outline-secondary" style="font-size: 0.85em;" type="button">
+                  Délai :
+                  <span style="color: rgb(0, 0, 167);">{{ modele.delai_livraison_generale }}</span>
+                </buton>
+
+              </div>
+
+              {% if modele.gratuit_a_partir_de_prix %}
+                <p class="mb-0">
+                  Livraison gratuite à partir de :
+                  <span style="color: rgb(0, 0, 167);">{{ modele.gratuit_a_partir_de_prix|default:"N/A" }} Ar</span>
+                </p>
+              {% endif %}
+              
+            </div>
+          </div>
+        </div>
+
+
+        <div class="zone-section p-2" style=" border-radius: 8px;">
+          <div class="zone-header d-flex justify-content-between align-items-center pb-2" 
+              style="background-color:#dfe9f3; padding: 0.75rem 1.25rem; border-bottom: 1px solid #e9ecef; font-weight: 600;">
+            <strong><i class="fas fa-map-marked-alt me-2"></i>Zones associées :</strong>
+            <span class="badge bg-primary rounded-pill">{{ modele.zones.count }} zones</span>
+          </div>
+
+          <div>
+            {% for zone in modele.zones.all %}
+              
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h4 class="mb-0">
+                    <a class="text-decoration-none d-flex align-items-center" 
+                      data-bs-toggle="collapse"
+                      href="#collapseDetails{{ zone.id }}"
+                      role="button"
+                      aria-expanded="false"
+                      aria-controls="collapseDetails{{ zone.id }}"
+                      style="color: rgb(1, 7, 68); font-size: 0.7em;">
+                      {{ zone.adresse.district }}
+                      <i id="icon_zone{{ zone.id }}" class="fas fa-eye-slash ms-2" style="font-size: 0.7em;"></i>
+                    </a>
+
+                  </h4> &nbsp; &nbsp;
+
+                  <div class="d-flex gap-2">
+
+                    <a href="{% url 'edit_zone_livraison' zone.id %}" 
+                      class="btn btn-sm  open-zone-livraison-modal" 
+                      data-url="{% url 'edit_zone_livraison' zone.id %}">
+                      <i class="bi bi-pencil-square"></i>
+                    </a>
+
+                    <a href="#" class="btn btn-sm  open-confirm-delete" data-url="{% url 'delete_zone_livraison' zone.id %}">
+                      <i class="bi bi-trash"></i>
+                    </a>
+
+                  </div>
+                </div> 
+
+                <div class="collapse mt-1" id="collapseDetails{{ zone.id }}">
+                  <div class="mb-1" style="font-size: 0.8em;">
+                    <div class="mb-1">
+                      <div>             
+                        {{ zone.adresse.region }} / {{ zone.adresse.district }} / {{ zone.adresse.commune }} / 
+                        {{ zone.adresse.fokontany }}
+                        <p>
+                          <span style="color: red;">frais : {{ zone.frais_base }} Ar</span>
+                            | 
+                          <span style="color: rgb(0, 45, 141);">Supplement : {{zone.frais_par_supplement|default:"0" }} Ar / {{ zone.unite_supplement }} pieces</span>
+                            | 
+                          <span style="color: rgb(175, 0, 137);">delai : {{zone.delai_livraison_zone}} </span>
+                        </p> 
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+            {% empty %}
+              <div class="p-3">Aucune zone définie pour ce modèle.</div>
+            {% endfor %}
+            <div class="d-flex justify-content-end align-items-center  p-2">
+              
+              <!-- Bouton pour ouvrir le modal -->
+              <a href="{% url 'ajouter_zone_livraison' modele.id %}"
+                class="btn text-decoration-none open-zone-livraison-modal"
+                data-bs-toggle="modal"
+                data-bs-target="#modalZoneLivraison"
+                data-url="{% url 'ajouter_zone_livraison' modele.id %}">
+                <i class="fas fa-plus-circle me-2"></i>zone
+              </a>
+
+            </div>
+
+          </div>
+        </div>
+
+        <div class="zone-section p-2" style=" border-radius: 8px;">
+          <div class="zone-header d-flex justify-content-between align-items-center pb-2" 
+              style="background-color:#f0f083; padding: 0.75rem 1.25rem; border-bottom: 1px solid #e9ecef; font-weight: 600;">
+            <strong><i class="fas fa-map-marked-alt me-2"></i>Hors Zones </strong>
+            <span class="badge rounded-pill" style="background-color: rgb(235, 156, 20);">{{ modele.horszones.count }} zones</span>
+          </div>
+          
+          <div>
+            {% for horszone in modele.horszones.all %}
+              <div class="d-flex justify-content-between align-items-center pt-2">
+                <p style="font-size: 0.8em;">
+                <strong> Frais base : </strong> {{ horszone.frais_base|default:"N/A" }} Ar, <br> 
+                <strong> Frais supplément : </strong> {{ horszone.frais_par_supplement|default:"0" }} Ar / {{ horszone.unite_supplement }} pieces<br>
+                <strong> Delai : </strong> {{ horszone.delai_livraison_horszone }}
+                </p>
+
+                <a href="#" class="btn open-horszone-modal" data-url="{% url 'edit_horszone_livraison' horszone.id %}">
+                  <i class="bi bi-pencil-square text-decoration-none" style="margin-right: 15px;"></i>
+                </a>
+            </div>
+
+            {% empty %}
+              <div class="p-3">Tsy misy</div>
+                <div class="d-flex justify-content-end align-items-center p-2">
+                  <i class="fas fa-plus-circle me-2"></i>
+                  <button class="btn text-decoration-none p-0 open-horszone-modal" data-url="{% url 'ajouter_horszone_livraison' modele.id %}">
+                    hors zone
+                  </button>
+                </div>
+            {% endfor %}
+          </div>
+        </div>
+        
+      </div>
+    {% empty %}
+      <div class="p-3">
+        <em>Mila mamorona modele de frais de livraison enao ho apetaka amin'ny entana amidy</em>
+      </div>
+    {% endfor %}
+    <div class="text-end">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalModeleLivraison" id="btn-open-modal">
+        Ajouter un modèle
+      </button>
+    </div>
+  </div>
+
+
+
+  <!-- Spinner caché au début loader -->
+  <div id="loader" class="text-center mt-3" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+
+
+  <div>
+    <!-- POUR LE MODELE Modal vide, le contenu sera chargé par AJAX -->
+    <div class="modal fade" id="modalModeleLivraison" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg custom-modal-width" style="margin: auto;">
+        <div class="modal-content">
+          <!-- Corps où injecter le contenu AJAX -->
+          <div class="modal-body" id="modal-modele-form-container">
+            <!-- Contenu injecté ici -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- script pour ajouter modele_livraison -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById('modalModeleLivraison');
+
+        // Ouvrir le modal pour ajouter un modèle
+        document.getElementById("btn-open-modal").addEventListener("click", () => {
+          fetch("{% url 'ajouter_modele_livraison' %}", {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+          })
+          .then(response => response.json())
+          .then(data => {
+            document.getElementById("modal-modele-form-container").innerHTML = data.html;
+            new bootstrap.Modal(modal).show();
+          });
+        });
+
+        // Délégation d'événement pour ouvrir le modal de modification
+        document.body.addEventListener("click", function (e) {
+          const btn = e.target.closest(".open-modele-livraison-modal");
+          if (btn) {
+            e.preventDefault();
+            const url = btn.dataset.url;
+
+            fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+              .then(response => response.json())
+              .then(data => {
+                document.getElementById("modal-modele-form-container").innerHTML = data.html;
+                new bootstrap.Modal(modal).show();
+              });
+          }
+        });
+
+        // Soumission AJAX du formulaire (ajout et modification)
+        document.addEventListener("submit", function (e) {
+          if (e.target.id === "modele-livraison-form") {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const loader = document.getElementById("loader");
+            if (loader) loader.style.display = "block";
+
+            fetch(form.action, {
+              method: "POST",
+              body: formData,
+              headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) bsModal.hide();
+
+                window.location.reload();
+              } else {
+                document.getElementById("modal-modele-form-container").innerHTML = data.html;
+              }
+            })
+            .catch(() => {
+              alert("Une erreur est survenue, veuillez réessayer plus tard.");
+            })
+            .finally(() => {
+              if (loader) loader.style.display = "none";
+            });
+          }
+        });
+      });
+    </script>
+
+  </div>
+
+
+
+
+  <div>
+    <!-- POUR LE ZONE Modal AJAX pour zone de livraison -->
+    <div class="modal fade" id="modalZoneLivraison" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-lg custom-modal-width">
+        <div class="modal-content box" id="modal-zone-form-container">
+          <!-- Le contenu sera injecté ici via AJAX -->
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .custom-modal-width {
+      max-width: 80%;
+    }
+
+    #modalZoneLivraison .modal-dialog {
+      margin: auto;
+    }
+
+    </style>
+
+    <script> 
+    // AJAX
+      document.addEventListener('DOMContentLoaded', function () {
+        // Ouvrir le formulaire dans le modal
+        document.querySelectorAll('.open-zone-livraison-modal').forEach(button => {
+          button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const url = this.dataset.url;
+
+            fetch(url)
+              .then(response => response.text())
+              .then(html => {
+                document.getElementById('modal-zone-form-container').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('modalZoneLivraison')).show();
+              });
+          });
+        });
+
+        // Gestion de la soumission AJAX du formulaire
+        document.body.addEventListener('submit', function (event) {
+          const form = event.target;
+          if (form.id === 'zone-livraison-form') {
+            event.preventDefault();
+            const url = form.action;
+            const formData = new FormData(form);
+
+            fetch(url, {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            })
+              .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                  return response.json();  // 🎯 Réponse en JSON => succès
+                } else {
+                  return response.text(); // ❌ Formulaire avec erreurs => HTML
+                }
+              })
+              .then(data => {
+                if (typeof data === 'object' && data.success) {
+                  const modal = bootstrap.Modal.getInstance(document.getElementById('modalZoneLivraison'));
+                  modal.hide();
+                  location.reload();
+                } else {
+                  document.getElementById('modal-zone-form-container').innerHTML = data;
+                  initAdresseSelects();
+                }
+              })
+
+              .catch(error => {
+                // S’il y avait des erreurs, afficher dans le modal
+                if (typeof error === 'string') {
+                  document.getElementById('modal-zone-form-container').innerHTML = error;
+                } else {
+                  alert("Erreur lors de l’envoi du formulaire.");
+                  console.error(error);
+                }
+              });
+          }
+        });
+      });
+    </script>
+
+    <script>
+      // ADRESSE 
+      // Fonction qui initialise les écouteurs de changement sur le formulaire
+      function initAdresseSelects() {
+        const regionSelect = document.getElementById('region');
+        const districtSelect = document.getElementById('district');
+        const communeSelect = document.getElementById('commune');
+        const fokontanySelect = document.getElementById('fokontany');
+        const adresseIdInput = document.getElementById('adresse_id');
+
+        if (!regionSelect) return; // Sécurité si modal vide ou autre contenu
+
+        async function fetchAndPopulate(url, targetSelect, resetBelow = []) {
+          const res = await fetch(url);
+          const data = await res.json();
+
+          targetSelect.innerHTML = '<option value="">-- Choisissez --</option>';
+          data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.textContent = item;
+            targetSelect.appendChild(opt);
+          });
+
+          targetSelect.disabled = false;
+          resetBelow.forEach(select => {
+            select.innerHTML = '<option value="">-- Choisissez --</option>';
+            select.disabled = true;
+          });
+
+          adresseIdInput.value = ""; // Reset ID
+        }
+
+        // Chargement initial régions seulement si modal chargé
+        fetchAndPopulate('/vendeur/api/regions/', regionSelect);
+
+        regionSelect.addEventListener('change', () => {
+          const region = regionSelect.value;
+          if (region) {
+            fetchAndPopulate(`/vendeur/api/districts/?region=${region}`, districtSelect, [communeSelect, fokontanySelect]);
+          }
+        });
+
+        districtSelect.addEventListener('change', () => {
+          const region = regionSelect.value;
+          const district = districtSelect.value;
+          if (region && district) {
+            fetchAndPopulate(`/vendeur/api/communes/?region=${region}&district=${district}`, communeSelect, [fokontanySelect]);
+          }
+        });
+
+        communeSelect.addEventListener('change', () => {
+          const region = regionSelect.value;
+          const district = districtSelect.value;
+          const commune = communeSelect.value;
+          if (region && district && commune) {
+            fetchAndPopulate(`/vendeur/api/fokontanys/?region=${region}&district=${district}&commune=${commune}`, fokontanySelect);
+          }
+        });
+
+        fokontanySelect.addEventListener('change', async () => {
+          const region = regionSelect.value;
+          const district = districtSelect.value;
+          const commune = communeSelect.value;
+          const fokontany = fokontanySelect.value;
+
+          if (region && district && commune && fokontany) {
+            const res = await fetch(`/vendeur/api/adresse-id/?region=${region}&district=${district}&commune=${commune}&fokontany=${fokontany}`);
+            const data = await res.json();
+
+            adresseIdInput.value = data.id || "";
+          }
+        });
+      }
+
+      // Au chargement initial de la page (utile si formulaire présent dès le départ)
+      document.addEventListener('DOMContentLoaded', () => {
+        initAdresseSelects();
+      });
+
+      // Ensuite, quand tu charges le contenu du formulaire dans le modal via AJAX,
+      // appelle initAdresseSelects() après injection pour ré-initialiser les écouteurs
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.open-zone-livraison-modal').forEach(button => {
+          button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const url = this.dataset.url;
+
+            fetch(url)
+              .then(response => response.text())
+              .then(html => {
+                document.getElementById('modal-zone-form-container').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('modalZoneLivraison')).show();
+                initAdresseSelects(); // <-- Important, réinitialiser les selecteurs ici
+              });
+          });
+        });
+      });
+    </script>
+  </div>
+
+  
+  <div>
+
+    <script>
+      /* ADRESSE PRESELECTIONNE */
+        function initAdresseSelects() {
+        const regionSelect = document.getElementById('region');
+        const districtSelect = document.getElementById('district');
+        const communeSelect = document.getElementById('commune');
+        const fokontanySelect = document.getElementById('fokontany');
+        const adresseIdInput = document.getElementById('adresse_id');
+
+        if (!regionSelect) return;
+
+        async function fetchAndPopulate(url, targetSelect, resetBelow = []) {
+          const res = await fetch(url);
+          const data = await res.json();
+
+          targetSelect.innerHTML = '<option value="">-- Choisissez --</option>';
+          data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.textContent = item;
+            targetSelect.appendChild(opt);
+          });
+
+          targetSelect.disabled = false;
+          resetBelow.forEach(select => {
+            select.innerHTML = '<option value="">-- Choisissez --</option>';
+            select.disabled = true;
+          });
+
+          adresseIdInput.value = ""; // reset ID
+        }
+
+        // Fonction pour préselectionner les valeurs lors de la modification
+        async function preselect() {
+          const selectedRegion = regionSelect.dataset.selected;
+          const selectedDistrict = districtSelect.dataset.selected;
+          const selectedCommune = communeSelect.dataset.selected;
+          const selectedFokontany = fokontanySelect.dataset.selected;
+
+          if (!selectedRegion) return; // pas de préselection
+
+          // Sélectionne la région et charge les districts
+          regionSelect.value = selectedRegion;
+          await fetchAndPopulate(`/vendeur/api/districts/?region=${selectedRegion}`, districtSelect, [communeSelect, fokontanySelect]);
+
+          // Sélectionne le district et charge les communes
+          districtSelect.value = selectedDistrict;
+          await fetchAndPopulate(`/vendeur/api/communes/?region=${selectedRegion}&district=${selectedDistrict}`, communeSelect, [fokontanySelect]);
+
+          // Sélectionne la commune et charge les fokontany
+          communeSelect.value = selectedCommune;
+          await fetchAndPopulate(`/vendeur/api/fokontanys/?region=${selectedRegion}&district=${selectedDistrict}&commune=${selectedCommune}`, fokontanySelect);
+
+          // Sélectionne le fokontany
+          fokontanySelect.value = selectedFokontany;
+
+          // Ensuite récupère l'id de l'adresse (si nécessaire)
+          if (selectedRegion && selectedDistrict && selectedCommune && selectedFokontany) {
+            const res = await fetch(`/vendeur/api/adresse-id/?region=${selectedRegion}&district=${selectedDistrict}&commune=${selectedCommune}&fokontany=${selectedFokontany}`);
+            const data = await res.json();
+            adresseIdInput.value = data.id || "";
+          }
+        }
+
+        // Charger les régions initialement
+        fetchAndPopulate('/vendeur/api/regions/', regionSelect).then(() => {
+          preselect(); // Appelle la préselection après le chargement des régions
+        });
+
+        // Les événements normaux au changement
+        regionSelect.addEventListener('change', () => {
+          const region = regionSelect.value;
+          if (region) {
+            fetchAndPopulate(`/vendeur/api/districts/?region=${region}`, districtSelect, [communeSelect, fokontanySelect]);
+          }
+        });
+
+        districtSelect.addEventListener('change', () => {
+          const region = regionSelect.value;
+          const district = districtSelect.value;
+          if (region && district) {
+            fetchAndPopulate(`/vendeur/api/communes/?region=${region}&district=${district}`, communeSelect, [fokontanySelect]);
+          }
+        });
+
+        communeSelect.addEventListener('change', () => {
+          const region = regionSelect.value;
+          const district = districtSelect.value;
+          const commune = communeSelect.value;
+          if (region && district && commune) {
+            fetchAndPopulate(`/vendeur/api/fokontanys/?region=${region}&district=${district}&commune=${commune}`, fokontanySelect);
+          }
+        });
+
+        fokontanySelect.addEventListener('change', async () => {
+          const region = regionSelect.value;
+          const district = districtSelect.value;
+          const commune = communeSelect.value;
+          const fokontany = fokontanySelect.value;
+          if (region && district && commune && fokontany) {
+            const res = await fetch(`/vendeur/api/adresse-id/?region=${region}&district=${district}&commune=${commune}&fokontany=${fokontany}`);
+            const data = await res.json();
+            adresseIdInput.value = data.id || "";
+          }
+        });
+      }
+
+      // Appelle initAdresseSelects après injection du formulaire dans le modal
+      document.addEventListener('DOMContentLoaded', () => {
+        initAdresseSelects();
+      });
+
+    </script>
+  </div>
+
+
+  <div>
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog custom-modal-width" style="margin: auto; margin-top: 20px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+          </div>
+          <div class="modal-body">
+            <p id="modalDeleteMessage">Voulez-vous vraiment supprimer ce modèle ?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" class="btn btn-danger" id="btnConfirmerSuppression">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <script>
+      let modeleIdASupprimer = null; // On garde l’ID du modèle sélectionné
+
+      // Récupération du CSRF token
+      function getCookie(name) {
+          let cookieValue = null;
+          if (document.cookie && document.cookie !== "") {
+              const cookies = document.cookie.split(";");
+              for (let i = 0; i < cookies.length; i++) {
+                  const cookie = cookies[i].trim();
+                  if (cookie.startsWith(name + "=")) {
+                      cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                      break;
+                  }
+              }
+          }
+          return cookieValue;
+      }
+      const csrftoken = getCookie("csrftoken");
+
+      // Quand un bouton .btn-supprimer-modele est cliqué
+      document.querySelectorAll('.btn-supprimer-modele').forEach(btn => {
+          btn.addEventListener('click', function () {
+              modeleIdASupprimer = this.getAttribute('data-id');
+              const nom = this.getAttribute('data-nom');
+              document.getElementById('modalDeleteMessage').textContent = `Voulez-vous vraiment supprimer le modèle "${nom}" ?`;
+          });
+      });
+
+      // Quand on confirme la suppression
+      document.getElementById('btnConfirmerSuppression').addEventListener('click', function () {
+          if (!modeleIdASupprimer) return;
+
+          const url = `/vendeur/frais/modele-livraison/${modeleIdASupprimer}/delete/`;
+
+          fetch(url, {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': csrftoken,
+                  'X-Requested-With': 'XMLHttpRequest'
+              }
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  // Ferme le modal
+                  bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+                  // Recharge la page ou supprime la ligne dans le tableau
+                  window.location.reload(); // ou supprimer l'élément DOM sans recharger
+              } else {
+                  alert('Erreur lors de la suppression.');
+              }
+          })
+          .catch(error => {
+              console.error('Erreur fetch:', error);
+              alert('Une erreur est survenue.');
+          });
+      });
+
+    </script>
+  </div>
+
+  <div>
+    <!-- Pour le Horszone Modal Bootstrap vide -->
+    <div class="modal fade" id="horszoneModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered custom-modal-width " style="margin: auto;">
+        <div class="modal-content" id="horszoneModalContent">
+          <!-- Le formulaire sera chargé ici via AJAX -->
+        </div>
+      </div>
+    </div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Sélectionne tous les boutons ou liens qui doivent ouvrir le modal (ajout ou modif)
+  document.querySelectorAll(".open-horszone-modal").forEach(function(button) {
+    button.addEventListener("click", function(e) {
+      e.preventDefault();
+      const url = this.dataset.url;
+
+      // Charge le formulaire via AJAX
+      fetch(url)
+        .then(response => response.text())
+        .then(html => {
+          // Injecte le formulaire dans le modal
+          document.getElementById("horszoneModalContent").innerHTML = html;
+
+          // Affiche le modal Bootstrap
+          const horszoneModal = new bootstrap.Modal(document.getElementById("horszoneModal"));
+          horszoneModal.show();
+
+          // Ajoute la gestion de la soumission AJAX du formulaire chargé
+          handleHorsZoneFormSubmit(horszoneModal);
+        })
+        .catch(() => alert("Erreur lors du chargement du formulaire."));
+    });
+  });
+});
+
+function handleHorsZoneFormSubmit(modalInstance) {
+  const form = document.querySelector("#horszoneModalContent form");
+  if (!form) return;
+
+  form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(response => {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return response.json();
+      } else {
+        return response.text();
+      }
+    })
+    .then(data => {
+      if (typeof data === "object" && data.success) {
+        // Succès : fermer modal et rafraîchir la page ou faire update dynamique
+        modalInstance.hide();
+        location.reload();
+      } else {
+        // Échec : réinjecter le formulaire avec erreurs et rebind submit
+        document.getElementById("horszoneModalContent").innerHTML = data;
+        handleHorsZoneFormSubmit(modalInstance);
+      }
+    })
+    .catch(() => {
+      alert("Erreur lors de l'envoi du formulaire. Veuillez réessayer.");
+    });
+  });
+}
+</script>
+
+  </div>
+
+
+  <div>
+    <!-- Modal  zone confirmation suppression -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered custom-modal-width" style="margin: auto;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirmer la suppression</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+          </div>
+          <div class="modal-body">
+            <p>Voulez-vous vraiment supprimer cette zone ?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" id="btnConfirmDelete" class="btn btn-danger">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+      let deleteUrl = null;  // Stocke l’URL à appeler en DELETE
+
+      const deleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+      const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+
+      // Quand on clique sur un bouton supprimer
+      document.querySelectorAll('.open-confirm-delete').forEach(button => {
+        button.addEventListener('click', e => {
+          e.preventDefault();
+          deleteUrl = button.dataset.url;
+          deleteModal.show();
+        });
+      });
+
+      // Quand on confirme la suppression
+      btnConfirmDelete.addEventListener('click', () => {
+        if (!deleteUrl) return;
+
+        fetch(deleteUrl, {
+          method: 'POST',  // DeleteView Django attend POST pour supprimer
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),  // fonction getCookie à définir ci-dessous
+            'X-Requested-With': 'XMLHttpRequest',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            deleteModal.hide();
+            location.reload();  // ou mieux, supprimer la ligne dans le DOM pour éviter reload complet
+          } else {
+            alert('Erreur lors de la suppression.');
+          }
+        })
+        .catch(() => alert('Erreur lors de la suppression.'));
+      });
+
+      // Fonction pour récupérer le token CSRF cookie Django
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    });
+
+    </script>
+  </div>
+
+  <script>
+    
+    function onlyDigits(event) {
+      const allowedKeys = ['Backspace', 'ArrowLeft', 'ArrowRight', 'Tab', 'Delete'];
+      const isDigit = /^[0-9]$/.test(event.key);
+
+      // Autoriser uniquement chiffres et touches de contrôle
+      if (isDigit || allowedKeys.includes(event.key)) {
+        return true;
+      }
+
+      // Bloquer tout le reste (lettres, ., -, e, etc.)
+      event.preventDefault();
+      return false;
+    }
+  </script>
+
+
+  <script>
+    // Nettoyage après fermeture du modal pour éviter le fond sombre
+    document.addEventListener("DOMContentLoaded", function () {
+      document.addEventListener("hidden.bs.modal", function () {
+        // Supprimer les backdrop Bootstrap restants
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+        // Nettoyer le body
+        document.body.classList.remove('modal-open');
+        document.body.style.paddingRight = '';
+        document.body.style.overflow = 'auto'; // restaurer le scroll si besoin
+      });
+    });
+  </script>
+
+
+{% endblock %}
+
+{% block scripts %}  
+
+<script src="{% static 'js/liste_modele_livraison.js' %}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

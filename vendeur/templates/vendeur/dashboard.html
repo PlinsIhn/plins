@@ -1,0 +1,32 @@
+{% extends 'vendeur/base_vendeur.html' %}
+{% load static %}
+
+  {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+  {% endblock %}
+
+{% block content %}
+
+  <h1>Dashboard</h1>
+
+
+  <!-- style 99 -->
+  {% if show_overlay %}
+    <div id="overlay">
+      <div class="popup">
+          <h3>🕒 Compte en attente</h3><br>
+          <p><em>Ho verifiena kely vetivety aloha ny comptenao, farafaelany 3 Ora. <br>Mankasitraka tompoko !</em></p>
+          <div class="btn-group">
+            <a href="{% url 'logout' %}" class="text-danger text-decoration-none">
+                <i class="bi bi-box-arrow-left me-1"></i>Hi-deconekta
+            </a>
+            <a href="mailto:plins@plins.com" class="btn-outline">Contacter l'administrateur</a>
+          </div>
+      
+      </div>
+    </div>
+
+  {% endif %}
+
+
+{% endblock %}

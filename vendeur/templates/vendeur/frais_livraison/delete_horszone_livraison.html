@@ -1,0 +1,12 @@
+{% extends 'vendeur/base_vendeur.html' %}
+
+{% block content %}
+  <h2>Supprimer la zone hors livraison</h2>
+  <p>Voulez-vous vraiment supprimer cette zone hors livraison ?</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+    <a href="{% url 'liste_modele_livraison' %}" class="btn btn-secondary">Annuler</a>
+  </form>
+{% endblock %}

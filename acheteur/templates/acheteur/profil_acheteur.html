@@ -1,0 +1,21 @@
+{% extends 'acheteur/base_acheteur.html' %}
+
+{% block content %}
+  {% if not user.is_authenticated %}
+
+    Vous n'etes pas connecté<br>
+    <a href="{% url 'login_acheteur' %}">se connecter</a> <br> ou 
+    <br>
+    <a href="{% url 'signup_acheteur' %}">inscription</a>
+
+    {% else %}
+    
+        <h2>Bienvenue, {{ user.phone }}</h2>
+        
+        <a href="{% url 'liste_adresses' %}">mes adresses</a>      
+        
+        
+        <br><br><br>
+        <a href="{% url 'logout_acheteur' %}">se deconnecter</a>
+  {% endif %}
+{% endblock %}

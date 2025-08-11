@@ -1,0 +1,15 @@
+{% extends 'acheteur/base_acheteur.html' %}
+
+{% block content %}
+
+<h2>Inscription Acheteur</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">S'inscrire</button>
+    <a href="{% url 'login_acheteur' %}">login</a>
+</form>
+
+{% endblock %}

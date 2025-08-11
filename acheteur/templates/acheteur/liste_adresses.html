@@ -1,0 +1,59 @@
+{% extends 'acheteur/base_acheteur.html' %}
+
+{% block content %}
+<div class="container">
+    <h2>Mes adresses</h2>
+
+    {% if adresses %}
+        <ul>
+            {% for a in adresses %}
+                <li>
+                    <strong>{{ a.nom_adresse|default:"Adiresiko" }}</strong><br>
+                    {{ a.adresse.fokontany }} / {{ a.adresse.commune }} / {{ a.adresse.district }} / {{ a.adresse.region }} <br>
+                    {% if a.precision_adresse %} 
+                        <strong class="text-primary">Précision : </strong> {{ a.precision_adresse }}
+                    {% else %}
+                        <p class="text-danger">pas de précision</p>
+                    {% endif %}
+
+                    {% if a.est_defaut %}
+                        <span style="color: green; font-weight: bold;">Adresse par défaut</span>
+                    {% endif %}
+
+                    <!-- Bouton pour ouvrir le modal -->
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ a.id }}">
+                      Supprimer
+                    </button>
+                </li>
+                <hr>
+
+                <!-- Modal de confirmation propre à cette adresse -->
+                <div class="modal fade" id="confirmDeleteModal{{ a.id }}" tabindex="-1" aria-labelledby="confirmDeleteLabel{{ a.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <form method="post" action="{% url 'supprimer_adresse' pk=a.id %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="confirmDeleteLabel{{ a.id }}">Confirmer la suppression</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                          Êtes-vous sûr de vouloir supprimer cette adresse ?
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                          <button type="submit" class="btn btn-danger">Supprimer</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Vous n'avez encore ajouté aucune adresse.</p>
+    {% endif %}
+
+    <a href="{% url 'ajouter_adresse' %}" class="btn btn-primary">Ajouter une adresse</a>
+</div>
+{% endblock %}

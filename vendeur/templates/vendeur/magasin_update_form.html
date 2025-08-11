@@ -1,0 +1,106 @@
+{% extends 'vendeur/base_vendeur.html' %}
+
+{% block content %}
+    <script>
+        async function charger(url, selectId) {
+            const response = await fetch(url);
+            const data = await response.json();
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">---</option>';
+            data.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item;
+                opt.textContent = item;
+                select.appendChild(opt);
+            });
+        }
+
+        function initAdresseForm(regionInit, districtInit, communeInit, fokontanyInit) {
+            const regionSelect = document.getElementById("region");
+            const districtSelect = document.getElementById("district");
+            const communeSelect = document.getElementById("commune");
+            const fokontanySelect = document.getElementById("fokontany");
+
+            regionSelect.addEventListener("change", () => {
+                charger(`/vendeur/api/districts/?region=${regionSelect.value}`, "district");
+                communeSelect.innerHTML = fokontanySelect.innerHTML = '';
+            });
+
+            districtSelect.addEventListener("change", () => {
+                charger(`/vendeur/api/communes/?region=${regionSelect.value}&district=${districtSelect.value}`, "commune");
+                fokontanySelect.innerHTML = '';
+            });
+
+            communeSelect.addEventListener("change", () => {
+                charger(`/vendeur/api/fokontanys/?region=${regionSelect.value}&district=${districtSelect.value}&commune=${communeSelect.value}`, "fokontany");
+            });
+
+            charger(`/vendeur/api/regions/`, "region").then(() => {
+                if (regionInit) regionSelect.value = regionInit;
+                regionSelect.dispatchEvent(new Event('change'));
+
+                setTimeout(() => {
+                    if (districtInit) districtSelect.value = districtInit;
+                    districtSelect.dispatchEvent(new Event('change'));
+
+                    setTimeout(() => {
+                        if (communeInit) communeSelect.value = communeInit;
+                        communeSelect.dispatchEvent(new Event('change'));
+
+                        setTimeout(() => {
+                            if (fokontanyInit) fokontanySelect.value = fokontanyInit;
+                        }, 500);
+                    }, 500);
+                }, 500);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initAdresseForm(
+                "{{ form.instance.adresse_magasin.region|escapejs }}",
+                "{{ form.instance.adresse_magasin.district|escapejs }}",
+                "{{ form.instance.adresse_magasin.commune|escapejs }}",
+                "{{ form.instance.adresse_magasin.fokontany|escapejs }}"
+            );
+        });
+    </script>
+</head>
+<body>
+    <h2>Modifier mon profil magasin</h2>
+    {% if form.non_field_errors %}
+        <ul class="text-danger">
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.nom_magasin.label }} {{ form.nom_magasin }}
+        <br>
+        {{ form.logo.label }} {{ form.logo }}
+        <br>
+        {{ form.lien_page_facebook.label }} {{ form.lien_page_facebook }}
+        <br>
+        
+
+        <!-- Champs adresse hiérarchique -->
+        <label for="region">Région :</label>
+        <select id="region" name="region"></select><br>
+
+        <label for="district">District :</label>
+        <select id="district" name="district"></select><br>
+
+        <label for="commune">Commune :</label>
+        <select id="commune" name="commune"></select><br>
+
+        <label for="fokontany">Fokontany :</label>
+        <select id="fokontany" name="fokontany"></select><br>
+
+        {{ form.precision_adresse.label }} {{ form.precision_adresse }}<br>
+
+        <button type="submit">Enregistrer les modifications</button>
+    </form>
+
+{% endblock %}

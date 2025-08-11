@@ -1,0 +1,52 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/ajout_horszone_livraison.css' %}">
+
+<form method="post" action="{% url 'ajouter_horszone_livraison' modele.id %}" enctype="multipart/form-data">
+  {% csrf_token %}
+      <div class="box container mt-1">
+        <div class="row justify-content-center">
+          <div class="row mb-3">
+
+            <div class="modal-header mb-1">
+                <h5 class="modal-title text-truncate" style="max-width: 80%; white-space: nowrap; overflow: hidden;" title="{{ modele.nom }}">
+                    Ajouter Horszone
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" 
+                        style="background-color: rgb(0, 234, 255) !important; filter: invert(1); border-radius: 0.25rem;"></button>
+            </div>
+
+            <div class="col-md-6 position-relative mt-4">
+                <label for="id_frais_base" class="form-label custom-label">&nbsp;Frais de base @ Ar <span class="required-star">*</span>&nbsp;</label>
+                <input type="number" step="0.01" placeholder="ohatra : 3 000 Ar" name="frais_base" 
+                      class="form-control" id="id_frais_base" value="{{ form.frais_base.value|default:'' }}" 
+                      onkeydown="return onlyDigits(event)" oninput="formatNumberInput(this)" required>
+                {{ form.frais_base.errors }}
+            </div>
+
+            <div class="col-md-6 position-relative mt-4">
+                <label for="id_unite_supplement" class="form-label custom-label">&nbsp;Quantite pour supplement <span class="required-star">*</span>&nbsp;</label>
+                <input type="number" placeholder="ohatra : 10 Ar" name="unite_supplement" class="form-control" id="id_frais_base" value="{{ form.unite_supplement.value|default:'' }}" onkeydown="return onlyDigits(event)" required>
+                {{ form.unite_supplement.errors }}
+            </div>
+
+            <div class="col-md-6 position-relative mt-4">
+                <label for="id_frais_par_supplement" class="form-label custom-label">&nbsp;Frais supplémentaire @ Ar &nbsp;</label>
+                <input type="number" name="frais_par_supplement" class="form-control" id="id_frais_par_supplement" value="{{ form.frais_par_supplement.value|default:'' }}"  onkeydown="return onlyDigits(event)" placeholder="ohatra : 200 Ar">
+                {{ form.frais_par_supplement.errors }}
+            </div>
+
+            <div class="col-md-6 position-relative mt-4">
+                <label for="id_delai_livraison_horszone" class="form-label custom-label">&nbsp;Délai de livraison <span class="required-star">*</span>&nbsp;</label>
+                <input type="text" name="delai_livraison_horszone" class="form-control" placeholder="ohatra : ao anatin'ny 24H" id="id_delai_livraison_horszone" value="{{ form.delai_livraison_horszone.value|default:'' }}" required>
+                {{ form.delai_livraison_horszone.errors }}
+            </div>
+
+          </div>
+        </div>
+          <div class="pb-2  text-end" style="margin-right: 15px;">
+              <button type="submit" class="btn btn-outline-success">
+                  <i class="bi bi-plus-circle"></i> Ajouter
+              </button>
+          </div>
+      </div>
+</form>

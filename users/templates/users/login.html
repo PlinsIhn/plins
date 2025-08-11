@@ -1,0 +1,40 @@
+{% extends 'vendeur/base_home.html' %}
+{% load static %}
+
+{% block content %}
+
+    <p>Connexion</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {# Erreurs globales, comme mot de passe incorrect #}
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div style="color:red;">{{ error }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div>
+            <label for="id_phone">Téléphone :</label>
+            <input type="text" name="phone" id="id_phone" value="{{ form.phone.value|default_if_none:'' }}">
+            {% for error in form.phone.errors %}
+                <div style="color:red;">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div>
+            <label for="id_password">Mot de passe :</label>
+            <input type="password" name="password" id="id_password">
+            {% for error in form.password.errors %}
+                <div style="color:red;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit">Se connecter</button>
+    </form>
+    
+    <a href="{% url 'vendeur_signup' %}"> inscription vendeur</a>
+
+{% endblock %}

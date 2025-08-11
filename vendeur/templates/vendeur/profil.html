@@ -1,0 +1,37 @@
+{% extends 'vendeur/base_vendeur.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Profil du vendeur</h2>
+
+    <div class="card p-3" style="max-width: 500px;">
+        <div class="d-flex align-items-center mb-3">
+            {% if magasin.logo %}
+                <img src="{{ magasin.logo.url }}" alt="Logo" class="rounded-circle me-3" width="80" height="80">
+            {% else %}
+                <img src="{% static 'images/logo_pardefaut.jpg' %}" alt="Logo par défaut" class="rounded-circle me-3" width="80" height="80">
+            {% endif %}
+            <div style="width: 200px;">
+                <h4 class="mb-0">{{ magasin.nom_magasin }}</h4>
+                <small class="text-muted">{{ user.phone }}</small>
+            </div>
+        </div>
+
+        <div>
+            <h5>Informations</h5>
+            <hr>
+            <p><strong>Téléphone :</strong> {{ user.phone }}</p>
+            <p><strong>Lien_page :</strong> <a href="{{ magasin.lien_page_facebook }}">Ma page fb</a></p>
+            <p><strong>Adresse du magasin :</strong> {{ magasin.adresse_magasin }}</p>
+            <p><strong>Precision adresse :</strong> {{ magasin.precision_adresse }}</p>
+        </div>
+        <a href="{% url 'modifier_profil_magasin' %}">📝 Modifier mon profil</a>
+    </div>
+    <br>
+    <div>
+        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger">Se déconnecter</a>
+    </div>
+
+</div>
+{% endblock %}

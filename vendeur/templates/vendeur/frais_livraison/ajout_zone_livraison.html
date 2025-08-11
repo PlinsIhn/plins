@@ -1,0 +1,100 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/ajout_zone_livraison.css' %}">
+
+
+    <form method="post" id="zone-livraison-form" action="{% url 'ajouter_zone_livraison' modele.id %}">
+        
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div id="form-error-block" class="block-error">
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="modal-header">
+            <h5 class="modal-title text-truncate" style="max-width: 80%; white-space: nowrap; overflow: hidden;" title="{{ modele.nom }}">
+                zone : {{ modele.nom }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" 
+                    style="background-color: rgb(0, 234, 255) !important; filter: invert(1); border-radius: 0.25rem;"></button>
+        </div>
+
+
+        <div class="box container mt-1">
+            <div class="row justify-content-center">
+                <div class="row mb-3">
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="region" class="form-label custom-label">&nbsp;Région <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="region" name="region">
+                            <option value="">-- Sélectionnez une région --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="district" class="form-label custom-label">&nbsp;District <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="district" name="district" disabled>
+                            <option value="">-- distrika --</option>
+                        </select>
+                    </div>
+            
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="commune" class="form-label custom-label" >&nbsp;Commune <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="commune" name="commune" disabled>
+                            <option value="">-- kaominina --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="fokontany" class="form-label custom-label">&nbsp;Fokontany <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="fokontany" name="fokontany" disabled>
+                            <option value="">-- fokontany --</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="adresse" id="adresse_id">
+                
+            
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="id_frais_base" class="form-label custom-label">&nbsp;Frais de base @ Ar <span class="required-star">*</span>&nbsp;</label>
+                        <input type="number" name="frais_base" id="id_frais_base"
+                            value="{{ form.frais_par_supplement.value|default_if_none:'' }}" class="form-control" required
+                            placeholder="ohatra : 3 000 Ar"  onkeydown="return onlyDigits(event)" 
+                        >
+                    </div>
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="id_unite_supplement" class="form-label custom-label">&nbsp;Quantité pour supplement <span class="required-star">*</span>&nbsp;</label>
+                        <input type="number" name="unite_supplement"
+                            value="{{ form.unite_supplement.value|default_if_none:'' }}" class="form-control" required
+                            placeholder=" ohatra : 10"  onkeydown="return onlyDigits(event)"
+                        >
+                    </div>
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="id_frais_par_supplement" class="'form_label custom-label">&nbsp;frais supplement @ Ar&nbsp;</label>
+                        <input type="number" name="frais_par_supplement" class="form-control"
+                            placeholder="ohatra : 200 Ar"  onkeydown="return onlyDigits(event)">
+                    </div>
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="id_delai_livraison_zone" class="form-label custom-label">&nbsp;Delai livraison <span class="required-star">*</span>&nbsp;</label>
+                        <input type="text" name="delai_livraison_zone" class="form-control" required
+                            placeholder="ohatra : ao anatin'ny 24H">
+                    </div>
+                
+                </div>
+            </div>
+
+            <div class="pb-2  text-end" style="margin-right: 15px;">
+                <button type="submit" class="btn btn-outline-success">
+                    <i class="bi bi-plus-circle"></i> Ajouter
+                </button>
+            </div>
+            
+        </div>
+    
+    </form>

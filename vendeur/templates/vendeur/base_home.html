@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Plins - {% block title %}{% endblock %}</title>
+
+    <!--  seo  -->
+        <meta name="description" content="Plins est votre plateforme e-commerce pour des achats en ligne simples, rapides et sécurisés à Madagascar.">
+        <meta name="keywords" content="Plins, e-commerce, achats en ligne, Madagascar, produits, livraison, boutique">
+        <meta name="author" content="Plins">
+        <meta property="og:title" content="Plins - Votre plateforme e-commerce préférée">
+        <meta property="og:description" content="Commandez facilement et en toute sécurité avec Plins.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://www.plins.com/">
+        <meta property="og:image" content="{% static 'images/seo-image.jpg' %}">
+
+
+    <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="{% static 'css/bootstrap/css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/base_home.css' %}">
+    
+    <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    </head>
+    <body>
+
+    <!-- Header -->
+    <header class="sticky-top shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-color);">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4">Plins</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'vendeur_signup' %}"><i class="fas fa-user-plus me-1"></i>Inscription</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'login_vendeur' %}"><i class="fas fa-sign-in-alt me-1"></i>Connexion</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-question-circle me-1"></i>FAQ</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-life-ring me-1"></i>Aide</a></li>
+            </ul>
+            </div>
+        </div>
+        </nav>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-grow-1 py-4">
+        <div class="container">
+        {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="pt-3">
+        <div class="container">
+        <div class="row">
+            <!-- Contact -->
+            <!-- Banner -->
+            <section class="welcome-banner">
+                <div class="container">
+                <h5 class="fw-bold">Plins</h5>
+                <p class="mb-0">Votre plateforme e-commerce préférée pour des achats en ligne simples, rapides et sécurisés.</p>
+                </div>
+            </section>
+            
+            <div class="col-lg-6 mb-4">
+            <h5 class="text-white" style="cursor: pointer;" onclick="toggleContact()">
+                Contactez-nous <i id="chevron-icon" class="fas fa-chevron-down"></i>
+            </h5>
+            <div id="contact-info" class="text-start contact-toggle">
+                <p><i class="fas fa-map-marker-alt me-2"></i>Adresse : Antambolo</p>
+                <p><i class="fas fa-phone me-2"></i>Téléphone : +261 34 65 070 44</p>
+                <p><i class="fas fa-envelope me-2"></i>Email : plins@plins.com</p>
+            </div>
+            </div>
+
+            
+        <!-- Bottom -->
+        <div class="footer-bottom pt-3 mt-0 pb-3">
+            <div class="row small">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0">&copy; 2023 Plins. Tous droits réservés.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <div class="footer-links">
+                <a href="#" class="me-3">Confidentialité</a>
+                <a href="#" class="me-3">Conditions</a>
+                <a href="#">Mentions légales</a>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'js/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Contact Toggle Script -->
+    <script>
+    function toggleContact() {
+        const contactDiv = document.getElementById("contact-info");
+        const icon = document.getElementById("chevron-icon");
+        
+        const isVisible = contactDiv.classList.contains("open");
+        if (isVisible) {
+        contactDiv.classList.remove("open");
+        } else {
+        contactDiv.classList.add("open");
+        }
+        
+        icon.classList.toggle("fa-chevron-down", isVisible);
+        icon.classList.toggle("fa-chevron-up", !isVisible);
+    }
+    </script>
+
+    </body>
+</html>

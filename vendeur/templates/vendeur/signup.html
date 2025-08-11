@@ -1,0 +1,14 @@
+{% extends 'vendeur/base_home.html' %}
+{% load static %}
+
+{% block content %}
+
+    <p>Inscription vendeur</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">S’inscrire</button>
+    </form>
+
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends 'acheteur/base_acheteur.html' %}
+{% load static %}
+
+{% block content %}
+
+
+    <style>
+            .box {
+                border-radius: 10px; 
+                width: 90%; 
+                margin-top: 10px;  
+                box-shadow: 1px 4px 10px rgba(0, 0, 0, 0.5); 
+                padding-top: 10px;
+            }
+
+            label {
+                font-size: 0.8em;
+            }
+            .ajouter_produit_titre {
+                text-align: center;
+                color: rgb(243, 7, 101);
+            }
+            .custom-label {
+            position: absolute;
+            top: -1rem;
+            left: 1.5rem;
+            background: white;
+            z-index: 1;
+            color: rgb(38, 50, 212);
+            }
+
+            .custom-input {
+                border: 1px solid #c7c7c7;
+                border-radius: 5px;
+            }
+
+            .block-error {
+            display: block;
+            color: #dc3545; /* Rouge Bootstrap */
+            background-color: #f8d7da; /* Rose clair */
+            padding: 0.2rem 0.5rem;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            position: absolute;
+            }
+
+            .form-control::placeholder {
+                font-size: 0.7rem;
+                color: #b7b7b7;
+            }
+
+            .form-control::-webkit-input-placeholder {
+            font-size: 0.7rem;
+            }
+
+            .form-control:-ms-input-placeholder {
+                font-size: 0.7rem;
+            }
+            #preview-container {
+                display: none;
+                margin-top: 0.5rem;
+                }
+            #preview-container img {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                }
+            .required-star {
+                color : red;
+            }
+            #contenu-magasin{
+                border-radius: 10px;
+            }
+
+    </style>
+
+
+
+<h2 class="text-primary">Ajouter une adresse</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+        <div class="box container mt-4">
+            <h4>Adresse</h4>
+
+            <div class="row justify-content-center">
+                <div class="row mb-3">
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="region" class="form-label custom-label">&nbsp;Région <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="region" name="region">
+                            <option value="">-- Sélectionnez une région --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="district" class="form-label custom-label">&nbsp;District <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="district" name="district" disabled>
+                            <option value="">-- Sélectionnez un district --</option>
+                        </select>
+                    </div>
+            
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="commune" class="form-label custom-label" >&nbsp;Commune <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="commune" name="commune" disabled>
+                            <option value="">-- Sélectionnez une commune --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="fokontany" class="form-label custom-label">&nbsp;Fokontany <span class="required-star">*</span>&nbsp;</label>
+                        <select class="form-select" id="fokontany" name="fokontany" disabled>
+                            <option value="">-- Sélectionnez un fokontany --</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="adresse" id="adresse_id">
+<!--
+                    <div class="col-md-6 position-relative mt-4">
+                        <label for="precision_adresse" class="form-label custom-label">&nbsp;Précision d’adresse &nbsp;</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="precision_adresse" 
+                            name="precision_adresse"
+                            placeholder="ohatra : IVB 118A na akaiky pompy sns"
+                        >
+                    </div>  -->
+                </div>
+            </div>
+        </div>
+
+    <button type="submit">Enregistrer</button>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script>
+        async function fetchAndPopulate(url, targetSelect, resetBelow = []) {
+            const res = await fetch(url);
+            const data = await res.json();
+
+            targetSelect.innerHTML = '<option value="">-- Choisissez --</option>';
+            data.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                targetSelect.appendChild(opt);
+            });
+
+            targetSelect.disabled = false;
+            resetBelow.forEach(select => {
+                select.innerHTML = '<option value="">-- Choisissez --</option>';
+                select.disabled = true;
+            });
+
+            document.getElementById('adresse_id').value = ""; // Reset ID
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const regionSelect = document.getElementById('region');
+            const districtSelect = document.getElementById('district');
+            const communeSelect = document.getElementById('commune');
+            const fokontanySelect = document.getElementById('fokontany');
+            const adresseIdInput = document.getElementById('adresse_id');
+
+            // Charger les régions au départ
+            fetchAndPopulate('/vendeur/api/regions/', regionSelect);
+
+            regionSelect.addEventListener('change', () => {
+                const region = regionSelect.value;
+                if (region) {
+                    fetchAndPopulate(`/vendeur/api/districts/?region=${region}`, districtSelect, [communeSelect, fokontanySelect]);
+                }
+            });
+
+            districtSelect.addEventListener('change', () => {
+                const region = regionSelect.value;
+                const district = districtSelect.value;
+                if (region && district) {
+                    fetchAndPopulate(`/vendeur/api/communes/?region=${region}&district=${district}`, communeSelect, [fokontanySelect]);
+                }
+            });
+
+            communeSelect.addEventListener('change', () => {
+                const region = regionSelect.value;
+                const district = districtSelect.value;
+                const commune = communeSelect.value;
+                if (region && district && commune) {
+                    fetchAndPopulate(`/vendeur/api/fokontanys/?region=${region}&district=${district}&commune=${commune}`, fokontanySelect);
+                }
+            });
+
+            fokontanySelect.addEventListener('change', async () => {
+                const region = regionSelect.value;
+                const district = districtSelect.value;
+                const commune = communeSelect.value;
+                const fokontany = fokontanySelect.value;
+
+                if (region && district && commune && fokontany) {
+                    const res = await fetch(`/vendeur/api/adresse-id/?region=${region}&district=${district}&commune=${commune}&fokontany=${fokontany}`);
+                    const data = await res.json();
+
+                    if (data.id) {
+                        adresseIdInput.value = data.id;
+                    } else {
+                        adresseIdInput.value = "";
+                    }
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,707 @@
+{% extends 'vendeur/base_vendeur.html' %}
+{% load static %}
+
+<!-- Bloc pour CSS additionnel -->
+{% block extra_css %} 
+  <link rel="stylesheet" href="{% static 'css/ajouter_produit.css' %}">
+  <link rel="stylesheet" href="{% static 'css/modifier_produit.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <form id="ajouter-produit-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h2 class="ajouter_produit_titre mt-3">Modifier produit</h2>
+
+    <!-- Section 1: Informations de base -->
+    <div class="box container mt-4">
+      <h4>Information de base</h4>
+      <div class="row justify-content-center">            
+        <div class="row mb-3">
+          <!-- Nom du produit -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_nom_produit" class="form-label custom-label">
+              <small>&nbsp; Nom du produit <span class="required-star">*</span> &nbsp;</small>
+            </label>
+            <input
+              type="text"
+              class="form-control {% if produit_form.errors.nom_produit %}is-invalid{% endif %} custom-input"
+              id="id_nom_produit"
+              name="nom_produit"
+              required
+              value="{{ produit_form.instance.nom_produit }}"
+              placeholder="exemple : Chaussures"
+            >
+            {% if produit_form.errors.nom_produit %}
+            <div class="invalid-feedback">
+              {{ produit_form.errors.nom_produit.0 }}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Description -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_description" class="form-label custom-label">
+              <small>&nbsp; Description <span class="required-star">*</span>&nbsp;</small>
+            </label>
+            <textarea
+              class="form-control {% if produit_form.errors.description %}is-invalid{% endif %} custom-input"
+              id="id_description"
+              name="description"
+              rows="1"
+              required
+              placeholder="exemple : Chaussures de sport..."
+            >{{ produit_form.instance.description }}</textarea>
+            {% if produit_form.errors.description %}
+            <div class="invalid-feedback">
+              {{ produit_form.errors.description.0 }}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- MOQ -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_moq" class="form-label custom-label">
+              <small>&nbsp; Minimum de commande <span class="required-star">*</span>&nbsp;</small>
+            </label>
+            <input
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              class="form-control {% if produit_form.errors.moq %}is-invalid{% endif %} custom-input"
+              id="id_moq"
+              name="moq"
+              required
+              onkeydown="return onlyDigits(event)"
+              value="{{ produit_form.instance.moq }}"
+              placeholder="exemple : 5"
+            >
+            {% if produit_form.errors.moq %}
+            <div class="invalid-feedback">
+              {{ produit_form.errors.moq.0 }}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Mots-clés -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_mot_clet" class="form-label custom-label">
+              <small>&nbsp;Mot clé <span>(optionnel)</span><span class="required-star">*</span>&nbsp;</small>
+            </label>
+            <input 
+              type="text"
+              class="form-control custom-input"
+              name="mot_clet"
+              value="{{ produit_form.instance.mot_clet }}"
+              placeholder="chaussures, sport, cuir, etc"
+            >
+          </div>
+
+          <!-- Modèle de livraison -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_modele_livraison" class="form-label custom-label">
+              <small>&nbsp;Modèle de livraison <span class="required-star">*</span>&nbsp;</small>
+            </label>
+            <select 
+              name="modele_livraison"
+              id="id_modele_livraison"
+              class="form-select {% if produit_form.errors.modele_livraison %}is-invalid{% endif %} custom-input"
+              required>
+              <option value="">---------</option>
+              {% for obj in produit_form.fields.modele_livraison.queryset %}
+                <option value="{{ obj.id }}" {% if produit_form.instance.modele_livraison.id == obj.id %}selected{% endif %}>
+                  {{ obj.nom }}, calculer par : {{ obj.get_calcul_par_display }}
+                </option>
+              {% endfor %}
+            </select>
+            {% if produit_form.errors.modele_livraison %}
+            <div class="invalid-feedback">
+              {{ produit_form.errors.modele_livraison.0 }}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Image du produit -->
+          <div class="col-md-6 position-relative mt-4">
+            <label for="id_image_profil_produit" class="form-label custom-label">
+              <small>&nbsp; Image du Produit <span class="required-star">*</span>&nbsp;</small>
+            </label>
+            <input
+              type="file"
+              class="form-control custom-input"
+              id="id_image_profil_produit"
+              name="image_profil_produit"
+              accept="image/*"
+              onchange="previewImage(event)"
+              {% if not produit_form.instance.image_profil_produit %}required{% endif %}
+            >
+            <div id="preview-container">
+              {% if produit_form.instance.image_profil_produit %}
+                <img id="preview-image" src="{{ produit_form.instance.image_profil_produit.url }}" alt="Image actuelle">
+              {% else %}
+                <img id="preview-image" src="#" alt="Aperçu image" style="display: none;">
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-md-12 position-relative mt-4">
+            <label for="{{ produit_form.promo_active.id_for_label }}" class="form-label custom-label">
+              {{ produit_form.promo_active }}&nbsp; Activer la promotion produit
+            </label>
+          </div>
+
+          <div id="promo_fields" class="row" style="display: none;">
+            <div class="col-md-4 position-relative mt-3">
+              <label for="{{ produit_form.reduction_pourcentage.id_for_label }}" class="form-label custom-label">
+                Réduction (%)
+              </label>
+              {{ produit_form.reduction_pourcentage }}
+            </div>
+
+            <div class="col-md-4 position-relative mt-3">
+              <label for="{{ produit_form.promo_debut.id_for_label }}" class="form-label custom-label">
+                Date début promo
+              </label>
+              {{ produit_form.promo_debut }}
+            </div>
+
+            <div class="col-md-4 position-relative mt-3">
+              <label for="{{ produit_form.promo_fin.id_for_label }}" class="form-label custom-label">
+                Date fin promo
+              </label>
+              {{ produit_form.promo_fin }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Variations du produit -->
+    <div class="box container mt-4">
+      <h4>Variations du produit</h4>
+      <div id="variation-error-message" class="block-error" style="display: none;"></div>
+      {{ variation_formset.management_form }}
+
+      {% if variation_formset.non_form_errors %}
+        <div class="text-danger mb-2">
+          {{ variation_formset.non_form_errors }}
+        </div>
+      {% endif %}
+
+      <div id="variation-forms-container">
+        {% for form in variation_formset %}
+        <div class="variation-form border p-2 mb-4 rounded position-relative">
+          {{ form.DELETE }} fafana
+          {{ form.id }}
+          
+          {# Affiche le bouton sauf pour le premier formulaire s'il s'agit d'une variation existante #}
+          {% if not forloop.first or not form.instance.pk %}
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-variation" style="background-color: red; padding:5px;" aria-label="Supprimer"></button>
+          {% endif %}
+
+          <div class="row mb-2 mt-2">
+            <!-- Nom de la variation -->
+            <div class="col-md-6 position-relative mt-4">
+              <label for="{{ form.nom_variation.id_for_label }}" class="form-label custom-label">
+                <small>&nbsp; Nom de la variation <span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <input
+                type="text"
+                class="form-control {% if form.nom_variation.errors %}is-invalid{% endif %} custom-input"
+                id="{{ form.nom_variation.id_for_label }}"
+                name="{{ form.nom_variation.html_name }}"
+                value="{{ form.instance.nom_variation }}"
+                required
+                placeholder="exemple : Chaussures pointure 41"
+              >
+              {% if form.nom_variation.errors %}
+                <div class="invalid-feedback">{{ form.nom_variation.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Prix -->
+            <div class="col-md-6 position-relative mt-4">
+              <label for="{{ form.prix.id_for_label }}" class="form-label custom-label">
+                <small>&nbsp; Prix (Ariary) <span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <input
+                type="text"
+                class="form-control {% if form.prix.errors %}is-invalid{% endif %} custom-input"
+                id="{{ form.prix.id_for_label }}"
+                name="{{ form.prix.html_name }}"
+                value="{{ form.instance.prix }}"
+                required
+                placeholder="20 000"
+                inputmode="numeric"
+                oninput="formatNumberInput(this)"
+              >
+              {% if form.prix.errors %}
+                <div class="invalid-feedback">{{ form.prix.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Stock -->
+            <div class="col-md-6 position-relative mt-4">
+              <label for="{{ form.stock.id_for_label }}" class="form-label custom-label">
+                <small>&nbsp; Stock <span class="required-star">*</span>&nbsp;</small>
+              </label>
+              <input
+                type="number"
+                class="form-control {% if form.stock.errors %}is-invalid{% endif %} custom-input"
+                id="{{ form.stock.id_for_label }}"
+                name="{{ form.stock.html_name }}"
+                value="{{ form.instance.stock }}"
+                min="1"
+                step="1"
+                onkeydown="return onlyDigits(event)"
+                required
+                placeholder="exemple : 10"
+              >
+              {% if form.stock.errors %}
+                <div class="invalid-feedback">{{ form.stock.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Image de la variation -->
+            <div class="col-md-6 position-relative mt-4">
+              <label for="{{ form.image_variation.id_for_label }}" class="form-label custom-label">
+                <small>&nbsp; Image de la variation &nbsp;</small>
+              </label>
+              <input
+                type="file"
+                class="form-control custom-input image-variation-input"
+                id="{{ form.image_variation.id_for_label }}"
+                name="{{ form.image_variation.html_name }}"
+                accept="image/*"
+                onchange="previewVariationImage(this)"
+              />
+              <div class="preview-container mt-2">
+                {% if form.instance.image_variation %}
+                  <img class="preview-image" src="{{ form.instance.image_variation.url }}">
+                {% else %}
+                  <img class="preview-image" src="#" style="display: none;">
+                {% endif %}
+              </div>
+              {% if form.image_variation.errors %}
+                <div class="invalid-feedback">{{ form.image_variation.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      <div class="text-end">
+        <button type="button" id="add-variation" class="btn btn-primary">
+          + Ajouter une variation
+        </button>
+      </div>
+      <br>
+    </div>
+
+    
+    <!-- === Détails === -->
+    <div class="box container mt-4">
+      <h4 class="d-inline-block">
+        Sary sy Video detaille
+      </h4>
+      <button type="button"
+              class="btn btn-sm text-info ms-2"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              title="Video ampidirina: 100Mo et 10mn  Max, fa ny enregistré dia 30s ihany, sary detaille 10 isa max">
+        <i class="bi bi-info-circle"></i>
+      </button>
+
+      <div class="row mb-3">
+
+        <!-- Vidéo -->
+        <div class="col-md-6 position-relative mt-4">
+          {% if has_existing_video %}
+            {% for video in detaille %}
+              {% if video.detaille_file %}
+                <video width="230" height="100" controls class="mb-2">
+                  <source src="{{ video.detaille_file.url }}" type="video/mp4">
+                  Votre navigateur ne supporte pas la vidéo.
+                </video>
+                <label>
+                  <input 
+                    type="checkbox" 
+                    name="delete_detaille_ids" 
+                    value="{{ video.id }}" 
+                    id="delete-video-checkbox"
+                  >
+                  Supprimer cette vidéo
+                </label>
+              {% endif %}
+            {% endfor %}
+            <!-- Champ input caché au départ -->
+            <div id="video-upload-container" style="display: none; margin-top: 20px;">
+              <label for="id_detaille_file" class="form-label custom-label" style="margin-top: 160px">
+                <small>&nbsp; Vidéo &nbsp;</small>
+              </label>
+              <input
+                type="file"
+                class="form-control custom-input"
+                id="id_detaille_file"
+                name="detaille_file"
+                accept="video/*"
+              >
+            </div>
+          {% else %}
+            <label for="id_detaille_file" class="form-label custom-label">
+              <small>&nbsp; Vidéo &nbsp;</small>
+            </label>
+            <input
+              type="file"
+              class="form-control custom-input"
+              id="id_detaille_file"
+              name="detaille_file"
+              accept="video/*"
+            >
+          {% endif %}
+        </div>
+
+
+        <!-- script 7 -->
+        <div class="col-md-6 position-relative mt-4">
+          <label for="id_detaille_image" class="form-label custom-label">
+            <small>&nbsp; Sary <span class="required-star">*</span>&nbsp;</small>
+          </label>
+          <input
+            type="file"
+            class="form-control custom-input"
+            id="id_detaille_image"
+            name="detaille_image"
+            accept="image/*"
+            multiple
+            {% if not has_existing_image %}required{% endif %}
+          >
+          <!-- Conteneur d'aperçu -->
+          <div id="detail-preview-container" class="d-flex flex-wrap gap-2 mt-3 mb-2"></div>
+
+          <p><strong>Images existantes :</strong><br>
+            {% for image in detaille %}
+              {% if image.detaille_image %}
+                <div class="image-wrapper">
+                  <img src="{{ image.detaille_image.url }}" alt="Image produit">
+                  <label class="delete-checkbox">
+                    <input type="checkbox" name="delete_detaille_ids" value="{{ image.id }}">
+                  </label>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bouton de soumission -->
+    <div class="text-enregistrer box1 container mt-4">
+      <button type="submit" class="btn btn-success">
+        Enregistrer les modifications
+      </button>
+    </div>
+  </form>
+</div>
+
+
+
+<!-- Script pour la gestion des variations -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const addBtn = document.getElementById('add-variation');
+    const formContainer = document.getElementById('variation-forms-container');
+    const totalFormsInput = document.getElementById('id_{{ variation_formset.prefix }}-TOTAL_FORMS');
+    const errorMessage = document.getElementById('variation-error-message');
+
+    // Fonction pour mettre à jour le nombre total de formulaires
+    function updateTotalForms() {
+      const visibleForms = formContainer.querySelectorAll('.variation-form:not([style*="display: none"])');
+      totalFormsInput.value = visibleForms.length;
+    }
+
+    // Ajouter une nouvelle variation
+    addBtn.addEventListener('click', () => {
+      const forms = formContainer.querySelectorAll('.variation-form');
+      const lastForm = forms[forms.length - 1];
+      const newForm = lastForm.cloneNode(true);
+      const newIndex = forms.length;
+
+      // Remplacer tous les index dans les attributs
+      newForm.querySelectorAll('input, select, textarea, label').forEach(el => {
+        if (el.name) el.name = el.name.replace(/-\d+-/, `-${newIndex}-`);
+        if (el.id) el.id = el.id.replace(/-\d+-/, `-${newIndex}-`);
+        if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/-\d+-/, `-${newIndex}-`);
+      });
+
+      // Réinitialiser les champs
+      newForm.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach(input => {
+        if (input.type !== 'file') input.value = '';
+        else input.value = null;
+      });
+
+      // Réinitialiser l'aperçu de l'image
+      const previewImg = newForm.querySelector('.preview-image');
+      if (previewImg) {
+        previewImg.src = '#';
+        previewImg.style.display = 'none';
+      }
+
+      // Cacher les champs DELETE et id pour la nouvelle variation
+      newForm.querySelector('input[name$="-DELETE"]').value = '';
+      newForm.querySelector('input[name$="-id"]').value = '';
+
+      formContainer.appendChild(newForm);
+      updateTotalForms();
+    });
+
+    // Supprimer une variation
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('remove-variation')) {
+        const form = e.target.closest('.variation-form');
+        const deleteInput = form.querySelector('input[name$="-DELETE"]');
+        const idInput = form.querySelector('input[name$="-id"]');
+        
+        if (idInput && idInput.value) {
+          // Variation existante - marquer pour suppression
+          deleteInput.value = 'on';
+          form.style.display = 'none';
+        } else {
+          // Nouvelle variation - supprimer complètement
+          form.remove();
+        }
+        
+        updateTotalForms();
+        
+        // Vérifier s'il reste au moins une variation visible
+        const visibleForms = formContainer.querySelectorAll('.variation-form:not([style*="display: none"])');
+        if (visibleForms.length === 0) {
+          errorMessage.innerText = "Vous devez avoir au moins une variation.";
+          errorMessage.style.display = "block";
+          setTimeout(() => {
+            errorMessage.style.display = "none";
+          }, 3000);
+        }
+      }
+    });
+  });
+
+  // Prévisualisation de l'image principale
+  function previewImage(event) {
+    const input = event.target;
+    const preview = document.getElementById('preview-image');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      }
+      
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // Prévisualisation de l'image de variation
+  function previewVariationImage(input) {
+    const preview = input.closest('.variation-form').querySelector('.preview-image');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      }
+      
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // Formatage des nombres (pour les prix)
+  function formatNumberInput(input) {
+    // Supprimer tous les caractères non numériques
+    let value = input.value.replace(/[^0-9]/g, '');
+    
+    // Formater avec des espaces comme séparateurs de milliers
+    if (value.length > 0) {
+      value = parseInt(value, 10).toLocaleString('fr-FR');
+    }
+    
+    input.value = value;
+  }
+
+  // Validation des chiffres seulement
+  function onlyDigits(event) {
+    const charCode = (event.which) ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      return false;
+    }
+    return true;
+  }
+</script>
+
+<!-- Script AJAX pour la soumission du formulaire -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let cookie of cookies) {
+              cookie = cookie.trim();
+              if (cookie.startsWith(name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  $.ajaxSetup({
+      headers: { 'X-CSRFToken': csrftoken }
+  });
+
+
+
+  $(document).ready(function() {
+    $('#ajouter-produit-form').on('submit', function(e) {
+      e.preventDefault();
+
+      const prixInputs = document.querySelectorAll('input[name$="-prix"], input[name="prix"]');
+      prixInputs.forEach(input => input.value = input.value.replace(/\s/g, '').trim());
+
+
+      let form = $(this)[0];
+      let formData = new FormData(form);
+      let messageDiv = $('#ajax-message');
+      let spinner = $('#loading-spinner');
+
+      $.ajax({
+        url:  "{% url 'modifier_produit' produit.id %}", // Utilise l'URL actuelle (modification)
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+
+        beforeSend: function() {
+          // Afficher le spinner ou l'overlay
+          spinner.show();
+          // Réinitialiser les messages d'erreur
+          $('.is-invalid').removeClass('is-invalid');
+          $('.invalid-feedback').remove();
+          messageDiv.html('');
+        },
+
+        complete: function() {
+          // Cacher le spinner
+          spinner.hide();
+        },
+
+        success: function(response) {
+          messageDiv.html('<div class="alert alert-success">Produit modifié avec succès !</div>');
+          
+          setTimeout(() => {
+            messageDiv.fadeOut(500, function() {
+              $(this).html('').show();
+              window.location.href = "{% url 'produit_vendeur' %}";
+            });
+          }, 1000);
+        },
+
+        error: function(xhr) {
+
+          console.error('Erreur Ajax:', xhr);
+          if (xhr.responseJSON) {
+            console.error('Réponse JSON:', xhr.responseJSON);
+          } else {
+            console.error('Réponse textuelle:', xhr.responseText);
+          }
+          
+          if (xhr.status === 400 && xhr.responseJSON?.errors) {
+            let errors = xhr.responseJSON.errors;
+            let generalErrors = [];
+
+            // Gestion des erreurs du formulaire principal
+            if (errors.form_errors) {
+              for (let field in errors.form_errors) {
+                let fieldErrors = errors.form_errors[field];
+                let input = $(`[name="${field}"]`);
+
+                if (input.length) {
+                  input.addClass('is-invalid');
+                  input.after(`<div class="invalid-feedback">${fieldErrors}</div>`);
+                } else {
+                  generalErrors.push(`${field}: ${fieldErrors}`);
+                }
+              }
+            }
+
+            // Gestion des erreurs des variations
+            if (errors.variation_formset_errors) {
+              generalErrors = generalErrors.concat(errors.variation_formset_errors);
+            }
+
+            if (generalErrors.length > 0) {
+              messageDiv.html(
+                `<div class="alert alert-danger"><ul>${generalErrors.map(e => `<li>${e}</li>`).join('')}</ul></div>`
+              );
+            }
+          } else {
+            messageDiv.html('<div class="alert alert-danger">Une erreur est survenue lors de la modification.</div>');
+          }
+        }
+      });
+    });
+  });
+</script>
+
+
+<!-- dynamique de bouton supprimer video et champs -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('delete-video-checkbox');
+    const uploadContainer = document.getElementById('video-upload-container');
+
+    if (checkbox && uploadContainer) {
+      checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
+          uploadContainer.style.display = 'block';
+        } else {
+          uploadContainer.style.display = 'none';
+          // Optionnel : vider le champ file si décoché
+          const inputFile = uploadContainer.querySelector('input[type="file"]');
+          if (inputFile) inputFile.value = '';
+        }
+      });
+    }
+  });
+</script>
+
+  <script>
+    function togglePromoFields() {
+      const checkbox = document.getElementById('{{ produit_form.promo_active.id_for_label }}');
+      const promoFields = document.getElementById('promo_fields');
+      promoFields.style.display = checkbox.checked ? 'flex' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const checkbox = document.getElementById('{{ produit_form.promo_active.id_for_label }}');
+      checkbox.addEventListener('change', togglePromoFields);
+      togglePromoFields();  // affiche ou cache selon l'état initial au chargement
+    });
+  </script>
+
+{% endblock %}
+
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/ajouter_produit.js' %}" defer></script>
+{% endblock %}

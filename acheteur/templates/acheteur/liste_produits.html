@@ -1,0 +1,78 @@
+{% extends 'acheteur/base_acheteur.html' %}
+{% load static %}
+
+{% block extra_css %} 
+
+  <link rel="stylesheet" href="{% static 'css/liste_produits.css' %}">
+
+{% endblock %}
+
+{% block content %}
+
+  <!-- style 1 -->
+
+  <div class="search-bar-sticky">
+    <form method="GET" action="#" class="mb-3">
+      <div class="input-group search-group">
+        <!-- Champ -->
+        <input 
+          type="text" 
+          name="q" 
+          class="form-control search-input" 
+          placeholder="Rechercher un produit..." 
+          aria-label="Rechercher" />
+
+        <!-- Caméra -->
+        <button type="button" class="btn btn-light border-0 search-addon">
+          <i class="bi bi-camera"></i>
+        </button>
+
+        <!-- Recherche -->
+        <button type="submit" class="btn border-0 bg-transparent text-primary search-addon">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!--  style 2 -->
+    {% if produits %}
+    <!-- Grille responsive de cartes -->
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-2 mt-1">
+
+      {% for prod in produits %}
+      <div class="col">
+        <a href="{% url 'acheteur_detail_produit' prod.id %}" class="text-decoration-none text-dark">
+          <div class="card h-100 position-relative">
+            
+
+            {% if prod.promo_est_active %}
+                <span class="badge-promo"><strong>- {{ prod.reduction_pourcentage}}% </strong></span>
+            {% elif prod.est_nouveau %}
+                <span class="badge-nouveau">Vaovao</span>
+            {% endif %}
+
+            <img src="{{ prod.image_profil_produit.url }}" class="produit-img" alt="{{ prod.nom_produit }}" onerror="this.src='https://via.placeholder.com/150'" />
+            
+            <div class="card-body nom_prix">
+              
+                {% if prod.promo_est_active %}
+                  <span class="text-danger">{{ prod.get_prix_minimum }} Ar</span> |
+                {% else %}
+                  <span>{{ prod.get_prix_minimum }} Ar</span> 
+                {% endif %}
+              
+              <div class="small text-truncate">{{ prod.nom_produit }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+
+    </div>
+
+    {% else %}
+    <p class="text-center mt-4">Aucun produit disponible pour le moment.</p>
+    {% endif %}
+
+{% endblock %}

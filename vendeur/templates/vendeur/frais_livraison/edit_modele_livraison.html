@@ -1,0 +1,59 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/ajout_modele_livraison.css' %}">
+
+  <form id="modele-livraison-form" method="post" action="{% url 'edit_modele_livraison' modele.id %}">
+    {% csrf_token %}
+
+    <!-- Bouton de fermeture en haut à droite -->
+    <div class="modal-header">
+        <h5 class="modal-title" style="font-size: 1em;">Modification du modèle</h5>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Fermer"
+                style="background-color: rgb(0, 234, 255) !important; filter: invert(1); border-radius: 0.25rem;"></button>
+    </div>
+
+    <div class="box container mt-1">
+        <div class="row justify-content-center">
+            <div class="row mb-3">
+
+                <!-- Champ Nom -->
+                <div class="col-md-6 position-relative mt-4">
+                    <label for="id_nom" class="form-label custom-label">&nbsp;Nom du modèle <span class="required-star">*</span>&nbsp;</label>
+                    <input type="text" name="nom" maxlength="100" class="form-control" value="{{ form.nom.value|default_if_none:'' }}" id="id_nom"
+                        placeholder="ohatra : Livraison expresse"  required>
+                </div>
+
+                <!-- Champ Calcul Par -->
+                <div class="col-md-6 position-relative mt-4">
+                    <label for="id_calcul_par" class="form-label custom-label">&nbsp;Calcul par <span class="required-star">*</span>&nbsp;</label>
+                    <select name="calcul_par" class="form-select" id="id_calcul_par" value="{{ form.calcul_par.value|default_if_none:'' }}" required>
+                        <option value="isa" selected>isa</option>
+                    </select>
+                </div>
+
+                <!-- Champ Délai de livraison générale -->
+                <div class="col-md-6 position-relative mt-4">
+                    <label for="id_delai_livraison_generale" class="form-label custom-label">&nbsp;Délai de livraison <span class="required-star">*</span>&nbsp;</label>
+                    <input type="text" name="delai_livraison_generale" maxlength="100" class="form-control" value="{{ form.delai_livraison_generale.value|default_if_none:'' }}" id="id_delai_livraison_generale" 
+                            placeholder="ohatra : anatin'ny 24 Ora" required>
+                </div>
+
+                <!-- Champ Livraison gratuite à partir de -->
+                <div class="col-md-6 position-relative mt-4">
+                    <label for="id_gratuit_a_partir_de_prix" class="form-label custom-label">&nbsp;gratuit si prix atteint (en Ar) &nbsp;</label>
+                    <input type="number" name="gratuit_a_partir_de_prix" class="form-control" value="{{ form.gratuit_a_partir_de_prix.value|default_if_none:'' }}" id="id_gratuit_a_partir_de_prix" min="0"
+                            placeholder="ohatra : gratuit raha > 100 000 Ar">
+                    <div class="form-text" style="font-size: 0.6em;">Montant minimum pour la livraison gratuite (facultatif).</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pb-2  text-end" style="margin-right: 15px;">
+        <button type="submit" class="btn btn-outline-success">
+            <i class="fas fa-edit"></i> Modifier
+        </button>
+    </div>
+  </form>
