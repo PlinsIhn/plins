@@ -23,6 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 ALLOWED_HOSTS = ['plins.onrender.com']
+DEBUG = True
 import os
 from dotenv import load_dotenv
 load_dotenv()
