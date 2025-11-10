@@ -1,0 +1,27 @@
+{% load format_mg %}
+
+
+ {% for prod in produits %}
+
+  <div class="col">
+    <a href="{% url 'acheteur_detail_produit' prod.id %}" class="text-decoration-none text-dark">
+      <div class="card h-100 position-relative">
+        {% if prod.promo_est_active %}
+          <span class="badge-promo"><strong>- {{ prod.reduction_pourcentage }}%</strong></span>
+        {% elif prod.est_nouveau %}
+          <span class="badge-nouveau">Vaovao</span>
+        {% endif %}
+        <img src="{{ prod.image_profil_produit.url }}" class="produit-img"
+          alt="{{ prod.nom_produit }}" onerror="this.src='https://via.placeholder.com/150'" />
+        <div class="card-body nom_prix" style="font-size: 0.9rem;">
+          {% if prod.promo_est_active %}
+            <strong> <span class="text-danger">{{ prod.get_prix_minimum|separateur_mg }} Ar</span> </strong>
+          {% else %}
+            <strong> <span style="color: rgb(36, 50, 245);">{{ prod.get_prix_minimum|separateur_mg }} Ar</span> </strong>
+          {% endif %}
+          <div class="small text-truncate">{{ prod.nom_produit }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+{% endfor %}

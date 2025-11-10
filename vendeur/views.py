@@ -141,7 +141,7 @@ class AjouterProduitView(LoginRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-        produit_form = ProduitForm()
+        produit_form = ProduitForm(vendeur=request.user)
         variation_formset = VariationProduitFormSet()
         detaille_formset = DetailleProduitFormSet()
         return render(request, 'vendeur/ajouter_produit.html', {
@@ -151,8 +151,7 @@ class AjouterProduitView(LoginRequiredMixin, View):
         })
 
     def post(self, request):
-        produit_form = ProduitForm(request.POST, request.FILES)
-
+        produit_form = ProduitForm(request.POST, request.FILES, vendeur=request.user)
         if not produit_form.is_valid():
             return JsonResponse({
                 'errors': {
@@ -250,7 +249,7 @@ class ModifierProduitView(LoginRequiredMixin, View):
     def get(self, request, pk):
         produit = get_object_or_404(Produits, pk=pk, magasin=request.user.magasin)
 
-        produit_form = ProduitForm(instance=produit)
+        produit_form = ProduitForm(instance=produit, vendeur=request.user)
         variation_formset = VariationProduitFormSet(instance=produit)
         detaille = produit.detailleproduit.all()
 
@@ -270,7 +269,7 @@ class ModifierProduitView(LoginRequiredMixin, View):
     def post(self, request, pk):
         
         produit = get_object_or_404(Produits, pk=pk, magasin=request.user.magasin)        
-        produit_form = ProduitForm(request.POST, request.FILES, instance=produit)
+        produit_form = ProduitForm(request.POST, request.FILES,vendeur=request.user, instance=produit)
         variation_formset = VariationProduitFormSet(request.POST, request.FILES, instance=produit)
         detaille = produit.detailleproduit.all()
         

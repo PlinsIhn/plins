@@ -83,6 +83,16 @@ class ProduitForm(forms.ModelForm):
             'promo_fin': forms.DateInput(attrs={'type': 'date'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        vendeur = kwargs.pop('vendeur', None)  # récupère l'utilisateur vendeur depuis la vue
+        super().__init__(*args, **kwargs)
+
+        if vendeur:
+            # Filtre les modèles pour ne garder que ceux du magasin du vendeur
+            self.fields['modele_livraison'].queryset = ModeleLivraison.objects.filter(
+                magasin=vendeur.magasin
+            )
+            
     def clean_image_profil_produit(self):
         image = self.cleaned_data.get('image_profil_produit')
         if image:

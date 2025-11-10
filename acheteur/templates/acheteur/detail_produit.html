@@ -1,4 +1,7 @@
 {% load static %}
+{% load date_malagasy %}
+{% load format_mg %}
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -87,18 +90,18 @@
                             <span style="color: rgb(22, 22, 186); font-weight: bold; font-size: 0.9em;">
                                 {% if produit.promo_est_active %}
                                     {% if prix_min == prix_max %}
-                                        <span class="text-muted text-decoration-line-through">{{ ancien_prix_min }} Ar</span>
-                                        <span class="text-danger fw-bold">{{ prix_min }} Ar (Promo!)</span>
+                                        <span class="text-muted text-decoration-line-through">{{ ancien_prix_min|separateur_mg }} Ar</span>
+                                        <span class="text-danger fw-bold">{{ prix_min|separateur_mg }} Ar</span> 
                                     {% else %}
-                                        <span class="text-muted text-decoration-line-through">{{ ancien_prix_min }} Ar ~ {{ ancien_prix_max }} Ar</span>
-                                        <span class="text-danger fw-bold">{{ prix_min }} Ar ~ {{ prix_max }} Ar (Promo!)</span>
+                                        <span class="text-muted text-decoration-line-through">{{ ancien_prix_min|separateur_mg }} Ar ~ {{ ancien_prix_max|separateur_mg }} Ar</span>
+                                        <span class="text-danger fw-bold">{{ prix_min|separateur_mg }} Ar ~ {{ prix_max|separateur_mg }} Ar</span>
                                     {% endif %}
-                                    <span> hatramin'ny {{ produit.promo_fin }} </span>
+                                    <span> hatramin'ny {{ produit.promo_fin|date_malagasy }} </span>
                                 {% else %}
                                     {% if prix_min == prix_max %}
-                                        <span>{{ prix_min }} Ar</span>
+                                        <span>{{ prix_min|separateur_mg }} Ar</span>
                                     {% else %}
-                                        <span>{{ prix_min }} Ar ~ {{ prix_max }} Ar</span>
+                                        <span>{{ prix_min|separateur_mg }} Ar ~ {{ prix_max|separateur_mg }} Ar</span>
                                     {% endif %}
                                 {% endif %}
 
@@ -111,27 +114,26 @@
                     
                         <h4 class="card-title">{{ produit.nom_produit }}</h4>
                         <p class="card-text">{{ produit.description }}</p>
-                        <p class="card-text">mot clet de recherche : {{ produit.mot_clet }}</p>
+                        
                     </div>
                     
                     <div class="card my-2 p-2">
-                        <div class="card">
+                        
                             <div class="card-header bg-warning text-white">
                                 <i class="bi bi-truck"></i> Informations de livraison
                             </div>
                             <div class="card-body">
                                 {% if produit.modele_livraison %}
-                                <h5 class="card-title">{{ produit.modele_livraison.nom }}</h5>
-                                <p class="card-text">
-                                    <strong>Délai generale :</strong> {{ produit.modele_livraison.delai_livraison_generale }}
-                                </p>
+                                    <h5 class="card-title">{{ produit.modele_livraison.nom }}</h5>
+                                    <p class="card-text" style="font-size: 0.9rem;">
+                                        <strong>Délai generale :</strong> {{ produit.modele_livraison.delai_livraison_generale }}
+                                    </p>
                                 {% else %}
-                                <div class="alert alert-warning mb-0">
-                                    <strong>Modèle de livraison :</strong> Ce produit n'est pas livrable.
-                                </div>
+                                    <div class="alert alert-warning mb-0">
+                                        <strong>Modèle de livraison :</strong> Tsy voafaritra.
+                                    </div>
                                 {% endif %}
                             </div>
-                        </div>
                     </div>
 
                     <!-- fournisseur -->
@@ -157,9 +159,11 @@
                             </div>
                         </div>
 
-                        <p class="mb-1"><strong>Téléphone :</strong> {{ produit.magasin.vendeur.phone }}</p>
-                        <p class="mb-1"><strong>Adresse :</strong> {{ produit.magasin.adresse_magasin }}</p>
-                        <p class="mb-0"><strong>Inscription :</strong> {{ produit.magasin.date_inscription }}</p>
+                        <div style="font-size: 0.8rem;">
+                            <p class="mb-1"><span>📞 : </span> {{ produit.magasin.vendeur.phone }}</p>
+                            <p class="mb-1"><span>🏠 : </span> {{ produit.magasin.adresse_magasin }}</p>
+                            <p class="mb-0"><span>🗓️ : </span> {{ produit.magasin.date_inscription|date_malagasy }}</p>
+                        </div>
                     </div>
 
                     <!-- Détails supplémentaires -->
@@ -207,26 +211,42 @@
 
         <!-- Footer fixe en bas -->
         <footer class="fixed-bottom bg-light border-top py-2">
-            <div class="container">
-                <div class="d-flex justify-content-around text-center">
-                    <a href="{% url 'liste_produits' %}" class="text-dark text-decoration-none">
-                        <i class="bi bi-bag-check"></i><br><small>produits</small>
-                    </a>
-                <a href="#" class="text-dark text-decoration-none">
-                    <i class="bi bi-shop"></i><br><small>Magasin</small>
+<div class="container">
+    <div class="bg-light rounded shadow-sm">
+        <div class="row text-center align-items-center">
+            <!-- Première section (plus petite) -->
+            <div class="col-5 d-flex justify-content-around border-end">
+                <a href="{% url 'liste_produits' %}" class="text-dark text-decoration-none">
+                    <i class="bi bi-box"></i>
+                </a>
+                <a href="{% url 'acheteur_produits_magasin' produit.magasin.id %}?from={{ produit.id }}" class="text-dark text-decoration-none">
+                    <i class="bi bi-shop"></i>
                 </a>
                 <a href="#" class="text-dark text-decoration-none">
-                    <i class="bi bi-chat-dots"></i><br><small>Message</small>
+                    <i class="bi bi-chat-dots"></i>
                 </a>
-                <a href="#" class="text-dark text-decoration-none">
-                    <i class="bi bi-cart"></i><br><small>Panier</small>
-                </a>
-                <a href="#" class="text-dark text-decoration-none">
-                    <i class="bi bi-bag-check"></i><br><small>Commander</small>
-                </a>
-
-                </div>
             </div>
+
+<!-- Deuxième section (plus large) -->
+<div class="col-7 d-flex justify-content-around">
+    <!-- Panier -->
+    <div class="rounded px-3 d-flex align-items-center justify-content-center position-relative" style="background-color: rgb(255, 119, 89);">
+        <a href="#" class="text-dark text-decoration-none position-relative">
+            <i class="bi bi-cart fs-4"></i>
+            <!-- Petit + au-dessus -->
+            <i class="bi bi-plus-circle-fill position-absolute" 
+               style="top: -3px; right: -10px; font-size: 0.9rem;"></i><br>
+        </a>
+    </div>
+
+    <!-- Hividy -->
+    <a href="#" class="btn rounded px-4" style="background-color: #00dff4;">
+        <small>Hividy</small>
+    </a>
+</div>
+
+
+
         </footer>
 
             <!-- modal d'image, script 2 -->

@@ -1,0 +1,209 @@
+{% extends 'acheteur/base_magasin_detail.html' %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/liste_produits.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="d-flex align-items-center p-2 border en-tete"
+      style="border-radius: 5px;">
+      {% if magasin.logo %}
+          <img src="{{ magasin.logo.url }}" alt="Logo du magasin"
+              class="rounded-circle me-3" width="65" height="65">
+      {% else %}
+          <img src="{% static 'images/logo_pardefaut.jpg' %}" alt="Logo par défaut"
+              class="rounded-circle me-3" width="65" height="65">
+      {% endif %}
+
+      <div>
+          <p class="mb-1 fw-bold" style="font-size: 1.1em;">{{ magasin.nom_magasin }}</p>
+          {% if magasin.vendeur.is_active %}
+          <span class="badge" style="background-color: rgb(32, 238, 13);">Activé</span>
+          {% else %}
+          <span class="badge bg-danger">Non activé</span>
+          {% endif %}
+          <span style="font-size: 0.7rem;">en ligne il y a ...</span>
+      </div>
+  </div>
+
+    <div class="card-infos my-2 p-2">
+        <div style="font-size: 0.8rem;">
+            <p class="mb-1"><span>📞 :</span> {{ magasin.vendeur.phone }}</p>
+            <p class="mb-1"><span>🏠 :</span> {{ magasin.adresse_magasin }}</p>
+            <p class="mb-0"><span>🗓️ :</span> {{ magasin.date_inscription }}</p>
+        </div>
+    </div>
+
+    <div class="search-bar-sticky-magasin">
+        <form method="GET" action="{% url 'acheteur_recherche_produits_magasin' magasin.id %}" class="mb-1">
+            <!-- 🔹 Transmet le produit d’origine -->
+            <input type="hidden" name="from" value="{{ produit_retour_id }}">
+
+            <div class="input-group search-group">
+                <input type="text" name="q" class="form-control search-input"
+                        value="{{ query }}" placeholder="Hitady entana ...." aria-label="Rechercher" />
+                <button type="submit" class="btn border-0 bg-transparent text-primary search-addon">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if produits %}
+        <div id="produits-container" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-2 mt-1">
+            {% include 'acheteur/includes/produits_list.html' %}
+        </div>
+
+    <br>
+    <div id="end-message" class="text-center text-muted my-3" style="display: none;">
+      <p>izay daholo ny entana rehetra 😎</p>
+    </div>
+        {% else %}
+        <p class="text-center mt-4">Tsy mbola misy io entana io!</p>
+        <hr>
+    {% endif %}
+
+    <style>
+        .en-tete {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background-color: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Barre de recherche collée juste en dessous du header */
+        .search-bar-sticky-magasin {
+        position: sticky;
+        top: 80px; /* ajusté selon la hauteur de .en-tete */
+        z-index: 99;
+        background-color: rgb(250, 248, 248);
+        padding-top: 8px;
+        padding-bottom: 5px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        /* Transition douce (optionnelle) */
+        .en-tete,
+        .search-bar-sticky-magasin {
+        transition: all 0.3s ease-in-out;
+        }
+        .card-infos {
+            overflow: hidden;
+            transition: transform 0.2s ease-in-out;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+    </style>
+
+    <footer class="fixed-bottom bg-light border-top py-2">
+    <div class="container">
+        <div class="d-flex justify-content-around text-center">
+        <!-- 🔹 Retour vers le magasin visité -->
+        <a href="{% url 'acheteur_produits_magasin' magasin.id %}?from={{ produit_retour_id }}"
+            class="text-decoration-none text-dark">
+            <i>←</i><br><small>Magasin</small>
+        </a>
+
+        <!-- 🔹 Messagerie -->
+        <a href="#" class="text-decoration-none text-dark">
+            <i class="bi bi-chat-dots"></i><br><small>Hiresaka</small>
+        </a>
+
+        <!-- 🔹 Produits récents -->
+        <a href="#" class="text-decoration-none text-dark">
+            <span>✨</span><br><small>Vaovao</small>
+        </a>
+
+        <!-- 🔹 Promotions -->
+        <a href="#" class="text-decoration-none text-dark">
+            <span>🔥</span><br><small>Promo</small>
+        </a>
+        </div>
+    </div>
+    </footer>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let page = 2;
+let loading = false;
+let noMoreData = false;
+
+// === 🔹 Fonction principale pour charger une page ===
+async function chargerPage() {
+  if (loading || noMoreData) return;
+  loading = true;
+
+  const params = new URLSearchParams(window.location.search);
+  params.set('page', page);
+
+  const response = await fetch(`?${params.toString()}`, {
+    headers: { "X-Requested-With": "XMLHttpRequest" }
+  });
+
+  if (!response.ok) {
+    loading = false;
+    return;
+  }
+
+  const data = await response.json();
+  if (data.produits_html.trim() !== '') {
+    const container = document.querySelector('#produits-container');
+    container.insertAdjacentHTML('beforeend', data.produits_html);
+
+    // Effet d’apparition douce
+    const newCards = container.querySelectorAll('.produit-card:not(.visible)');
+    newCards.forEach((card, i) => {
+      setTimeout(() => card.classList.add('visible'), i * 100);
+    });
+
+    page++;
+    loading = false;
+
+    if (!data.has_next) {
+      noMoreData = true;
+      document.getElementById('end-message').style.display = 'block';
+    }
+  } else {
+    noMoreData = true;
+    document.getElementById('end-message').style.display = 'block';
+  }
+}
+
+// === 🔹 Préchargement automatique selon la taille de l’écran ===
+async function prechargerSelonEcran() {
+  let pagesACharger = 1;
+  if (window.innerWidth >= 1200) pagesACharger = 3; // écran large (PC)
+  else if (window.innerWidth >= 768) pagesACharger = 2; // tablette
+
+  for (let i = 1; i < pagesACharger; i++) {
+    await chargerPage();
+  }
+}
+
+// === 🔹 Déclenchement par scroll infini ===
+window.addEventListener('scroll', async () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+    await chargerPage();
+  }
+});
+
+// === 🔹 Animation d’apparition initiale + préchargement ===
+document.addEventListener('DOMContentLoaded', async () => {
+  document.querySelectorAll('.produit-card').forEach((card, i) => {
+    setTimeout(() => card.classList.add('visible'), i * 100);
+  });
+
+  await prechargerSelonEcran(); // 👈 précharge plus de pages si grand écran
+});
+</script>
+{% endblock %}

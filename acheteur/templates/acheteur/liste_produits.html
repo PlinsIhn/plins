@@ -1,33 +1,19 @@
 {% extends 'acheteur/base_acheteur.html' %}
 {% load static %}
 
-{% block extra_css %} 
-
-  <link rel="stylesheet" href="{% static 'css/liste_produits.css' %}">
-
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/liste_produits.css' %}">
 {% endblock %}
 
 {% block content %}
-
-  <!-- style 1 -->
-
   <div class="search-bar-sticky">
-    <form method="GET" action="#" class="mb-3">
+    <form method="GET" action="{% url 'acheteur_recherche_produit' %}" class="mb-1">
       <div class="input-group search-group">
-        <!-- Champ -->
-        <input 
-          type="text" 
-          name="q" 
-          class="form-control search-input" 
-          placeholder="Rechercher un produit..." 
-          aria-label="Rechercher" />
-
-        <!-- Caméra -->
+        <input type="text" name="q" class="form-control search-input"
+          value="{{ query }}" placeholder="Hitady entana ...." aria-label="Rechercher" />
         <button type="button" class="btn btn-light border-0 search-addon">
           <i class="bi bi-camera"></i>
         </button>
-
-        <!-- Recherche -->
         <button type="submit" class="btn border-0 bg-transparent text-primary search-addon">
           <i class="bi bi-search"></i>
         </button>
@@ -35,44 +21,118 @@
     </form>
   </div>
 
-  <!--  style 2 -->
-    {% if produits %}
-    <!-- Grille responsive de cartes -->
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-2 mt-1">
-
-      {% for prod in produits %}
-      <div class="col">
-        <a href="{% url 'acheteur_detail_produit' prod.id %}" class="text-decoration-none text-dark">
-          <div class="card h-100 position-relative">
-            
-
-            {% if prod.promo_est_active %}
-                <span class="badge-promo"><strong>- {{ prod.reduction_pourcentage}}% </strong></span>
-            {% elif prod.est_nouveau %}
-                <span class="badge-nouveau">Vaovao</span>
-            {% endif %}
-
-            <img src="{{ prod.image_profil_produit.url }}" class="produit-img" alt="{{ prod.nom_produit }}" onerror="this.src='https://via.placeholder.com/150'" />
-            
-            <div class="card-body nom_prix">
-              
-                {% if prod.promo_est_active %}
-                  <span class="text-danger">{{ prod.get_prix_minimum }} Ar</span> |
-                {% else %}
-                  <span>{{ prod.get_prix_minimum }} Ar</span> 
-                {% endif %}
-              
-              <div class="small text-truncate">{{ prod.nom_produit }}</div>
-            </div>
-          </div>
-        </a>
-      </div>
-      {% endfor %}
-
+  {% if produits %}
+    <div id="produits-container" class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-2 mt-1">
+      {% include 'acheteur/includes/produits_list.html' %}
     </div>
 
-    {% else %}
+    <div id="loader" class="text-center my-3" style="display: none;">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+    </div>
+    
+    <div id="end-message" class="text-center text-muted my-3" style="display: none;">
+      <p>izay daholo ny entana rehetra 😎</p>
+    </div>
+
+  {% else %}
     <p class="text-center mt-4">Aucun produit disponible pour le moment.</p>
-    {% endif %}
+  {% endif %}
+
+  
+  <style>
+  #end-message p {
+    font-style: italic;
+    color: #6c757d;
+    transition: opacity 0.5s ease-in;
+  }
+
+  /* Animation douce à l’ajout des cartes */
+  .card {
+    transition: opacity 0.5s ease-in;
+  }
+  </style>
+
+{% endblock %}
+
+{% block extra_js %}
+
+  <script>
+  /**
+   * 🔹 Étape 1 : au tout début, calculer le page_size et recharger la page si nécessaire
+   * pour que Django affiche dès le départ le bon nombre de produits
+   */
+  function getPageSize() {
+    const width = window.innerWidth;
+    if (width < 576) return 12;   // Téléphone
+    if (width < 992) return 25;   // Tablette
+    return 65;                    // Ordinateur
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('page_size')) {
+    params.set('page_size', getPageSize());
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.location.replace(newUrl);
+  }
+
+  </script>
+
+  <script>
+  /**
+   * 🔹 Étape 2 : Gestion du scroll infini
+   */
+  let page = 2;
+  let loading = false;
+  let hasNext = true;
+
+  window.addEventListener('scroll', () => {
+    if (loading || !hasNext) return;
+
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+      loadMore();
+    }
+  });
+
+  function loadMore() {
+    loading = true;
+    document.getElementById('loader').style.display = 'block';
+    const pageSize = getPageSize();
+
+    fetch(`?page=${page}&page_size=${pageSize}`, { 
+      headers: { 'X-Requested-With': 'XMLHttpRequest' } 
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Erreur ' + response.status);
+        return response.json();
+      })
+      .then(data => {
+        const container = document.getElementById('produits-container');
+        if (data.produits_html.trim() !== "") {
+          container.insertAdjacentHTML('beforeend', data.produits_html);
+
+          // Animation douce
+          container.querySelectorAll('.card:not([data-animated])').forEach(el => {
+            el.dataset.animated = true;
+            el.style.opacity = 0;
+            setTimeout(() => (el.style.opacity = 1), 50);
+          });
+        }
+
+        if (!data.has_next) {
+          hasNext = false;
+          document.getElementById('end-message').style.display = 'block';
+        } else {
+          page++;
+        }
+      })
+      .catch(err => console.error('Erreur de chargement:', err))
+      .finally(() => {
+        document.getElementById('loader').style.display = 'none';
+        loading = false;
+      });
+  }
+  </script>
 
 {% endblock %}

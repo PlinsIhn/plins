@@ -4,13 +4,12 @@ body {
 /*  1  */
 .search-bar-sticky {
     position: sticky;
-    top: 0;
-    z-index: 1000; /* pour qu’elle reste au-dessus */
+    top: 63px;
+    z-index: 99; /* pour qu’elle reste au-dessus */
     background-color: rgb(250, 248, 248); /* pour cacher ce qu’il y a derrière */
     padding-top: 10px;
     padding-bottom: 5px;
     border-radius: 5px;
-    
   }
 
   /* Focus + style existant */

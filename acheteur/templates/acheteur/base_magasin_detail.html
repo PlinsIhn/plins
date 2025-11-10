@@ -1,0 +1,43 @@
+{% load static %}
+{% load format_mg %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Plins{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/bootstrap/css/bootstrap.min.css' %}">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  
+  <!-- Bloc pour CSS additionnel -->
+  {% block extra_css %} {% endblock %}
+
+</head>
+
+<body style="padding-bottom: 80px; background-color: #f4f4f4;">
+    
+
+  <div class="container-fluid p-2">
+    {% block content %}
+  
+    {% endblock %}
+  </div>
+  
+
+
+  <script src="{% static 'js/bootstrap-5.0.2-dist/js/bootstrap.bundle.min.js' %}"></script>
+
+  {% block extra_js %}
+
+  {% endblock %}
+
+  
+</body>
+</html>
