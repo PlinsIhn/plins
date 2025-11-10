@@ -12,7 +12,7 @@
           <span class="badge-nouveau">Vaovao</span>
         {% endif %}
         <img src="{{ prod.image_profil_produit.url }}" class="produit-img"
-          alt="{{ prod.nom_produit }}" onerror="this.src='https://via.placeholder.com/150'" />
+          alt="{{ prod.nom_produit }}"/>
         <div class="card-body nom_prix" style="font-size: 0.9rem;">
           {% if prod.promo_est_active %}
             <strong> <span class="text-danger">{{ prod.get_prix_minimum|separateur_mg }} Ar</span> </strong>
