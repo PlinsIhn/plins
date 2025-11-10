@@ -1,0 +1,66 @@
+            label {
+                font-size: 0.8em;
+            }
+
+            .box {
+                border-radius: 10px; 
+                width: 100%; 
+
+            }
+            .ajouter_produit_titre {
+                text-align: center;
+                color: rgb(243, 7, 101);
+            }
+            .custom-label {
+            position: absolute;
+            top: -0.8rem;
+            left: 1.5rem;
+            background: white;
+            z-index: 1;
+            color: rgb(38, 50, 212);
+            }
+
+            .custom-input {
+                border: 1px solid #c7c7c7;
+                border-radius: 5px;
+            }
+
+            .block-error {
+            display: block;
+            color: #dc3545; /* Rouge Bootstrap */
+            background-color: #f8d7da; /* Rose clair */
+            padding: 0.2rem 0.5rem;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            position: absolute;
+            text-align: center;
+            }
+
+            .form-control::placeholder {
+                font-size: 0.7rem;
+                color: #b7b7b7;
+            }
+
+            .form-control::-webkit-input-placeholder {
+            font-size: 0.7rem;
+            }
+
+            .form-control:-ms-input-placeholder {
+                font-size: 0.7rem;
+            }
+            #preview-container {
+                display: none;
+                margin-top: 0.5rem;
+                }
+            #preview-container img {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                }
+            .required-star {
+                color : red;
+            }
+            #contenu-magasin{
+                border-radius: 10px;
+            }

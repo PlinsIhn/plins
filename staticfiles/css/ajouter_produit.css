@@ -1,0 +1,132 @@
+/* 1 */
+
+  .box {
+    border-radius: 10px; 
+    width: 90%; 
+    margin-top: 10px;  
+    box-shadow: 1px 4px 10px rgba(0, 0, 0, 0.5); 
+    padding-top: 10px;
+
+  }
+  .ajouter_produit_titre {
+    text-align: center;
+    color: rgb(243, 7, 101);
+  }
+  .custom-label {
+  position: absolute;
+  top: -1rem;
+  left: 1.5rem;
+  background: white;
+  z-index: 1;
+  color: rgb(38, 50, 212);
+  }
+
+  .custom-input {
+    border: 1px solid #c7c7c7;
+    border-radius: 5px;
+  }
+
+  .block-error {
+  display: block;
+  color: #dc3545; /* Rouge Bootstrap */
+  background-color: #f8d7da; /* Rose clair */
+  padding: 0.2rem 0.5rem;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  position: absolute;
+}
+
+.form-control::placeholder {
+    font-size: 0.7rem;
+    color: #b7b7b7;
+}
+
+.form-control::-webkit-input-placeholder {
+  font-size: 0.7rem;
+}
+
+.form-control:-ms-input-placeholder {
+    font-size: 0.7rem;
+}
+
+/* 2  */
+
+#preview-container {
+    display: none;
+    margin-top: 0.5rem;
+    }
+#preview-container img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    }
+
+/* 3 script */
+
+/* 4 */
+#image_de_variation {
+    display: none;
+    }
+#image_de_variation img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    }
+
+/* 5  */
+.text-end button {
+    background-color: rgb(131, 223, 10);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: rgb(60, 57, 2);
+    cursor: pointer;
+  }
+
+/* 6 */
+.box1 {
+    border-radius: 10px; 
+    width: 90%; 
+    }
+
+.text-enregistrer {
+    text-align: right;
+    }
+
+.text-enregistrer button {
+    background-color: rgb(8, 19, 230);
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: rgb(241, 241, 239);
+    cursor: pointer;
+    }
+
+/*  script 7 */
+  .preview-image-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .preview-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 2px;
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+
+    color: rgb(224, 6, 6);
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+
+    cursor: pointer;
+  }

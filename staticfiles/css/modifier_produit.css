@@ -1,0 +1,36 @@
+  
+
+  .image-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 5px;
+  }
+
+  .image-wrapper img {
+    width: 50px;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .delete-checkbox {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+
+  
+.required-star {
+    color: red;
+    font-weight: bold;
+}
+/* Style pour les formulaires masqués */
+.variation-form[style*="display: none"] {
+    display: none !important;
+}
+
+  
